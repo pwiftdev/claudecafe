@@ -9,7 +9,13 @@ import StatsBar from "./StatsBar";
 import type { GameStats, AIThought } from "@/game/types";
 import type { BroadcastState } from "@/game/CafeGame";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3002";
+
+// Debug: Log the backend URL being used
+if (typeof window !== "undefined") {
+  console.log("[Dashboard] Backend URL:", BACKEND_URL);
+  console.log("[Dashboard] Env var:", process.env.NEXT_PUBLIC_BACKEND_URL);
+}
 
 const defaultStats: GameStats = {
   coffeeSold: 0,
@@ -119,7 +125,7 @@ export default function Dashboard() {
         </div>
 
         <div className="w-[380px] shrink-0 hidden lg:flex">
-          <SidePanel thoughts={thoughts} stats={stats} viewerCount={viewerCount} />
+          <SidePanel thoughts={thoughts} />
         </div>
       </div>
     </div>

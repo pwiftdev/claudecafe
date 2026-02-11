@@ -60,4 +60,5 @@ export interface AIThought {
   text: string;
   time: string;
   type: "strategy" | "observation" | "decision" | "reflection";
+  cost?: number; // Cost in USD for this AI thought
 }

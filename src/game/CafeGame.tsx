@@ -529,12 +529,18 @@ class CafeRenderer {
   characterGroup: THREE.Group;
   uiGroup: THREE.Group;
   sound = new SoundManager();
+  needsRenderCallback: (() => void) | null = null;
 
   // Track meshes by entity ID
   baristaMeshes: Map<number, THREE.Mesh> = new Map();
   customerMeshes: Map<number, { body: THREE.Mesh; bubble: THREE.Mesh | null; bubbleVisible: boolean }> = new Map();
   progressMeshes: Map<number, THREE.Mesh> = new Map();
   popupMeshes: Map<number, THREE.Mesh> = new Map();
+  
+  // Cache for progress textures to avoid recreation
+  progressTextureCache: Map<number, THREE.CanvasTexture> = new Map();
+  lastStockState: string = "";
+  lastBaristaProgress: Map<number, number> = new Map();
 
   sharedGeo = new THREE.PlaneGeometry(CHAR_W, CHAR_H);
   progressGeo = new THREE.PlaneGeometry(0.6, 0.12);
@@ -749,25 +755,66 @@ class CafeRenderer {
       // Progress bar for making state
       if (b.state === "making" && b.orderPrepTime > 0) {
         let progMesh = this.progressMeshes.get(b.id);
-        // Recreate progress bar texture each frame (cheap)
-        if (progMesh) {
-          this.uiGroup.remove(progMesh);
-          (progMesh.material as THREE.MeshBasicMaterial).map?.dispose();
-          (progMesh.material as THREE.MeshBasicMaterial).dispose();
+        const progress = Math.min(1, Math.max(0, b.orderProgress / b.orderPrepTime));
+        const progressKey = Math.floor(progress * 20); // Cache by 5% increments
+        const lastProgress = this.lastBaristaProgress.get(b.id) ?? -1;
+        
+        // Only update texture if progress changed significantly (5% or more)
+        const needsTextureUpdate = Math.abs(progress - lastProgress) >= 0.05;
+        this.lastBaristaProgress.set(b.id, progress);
+        
+        if (!progMesh) {
+          // Create mesh if it doesn't exist
+          let progTex = this.progressTextureCache.get(progressKey);
+          if (!progTex) {
+            progTex = createProgressTexture(progress);
+            this.progressTextureCache.set(progressKey, progTex);
+          }
+          const progMat = new THREE.MeshBasicMaterial({ map: progTex, transparent: true });
+          progMesh = new THREE.Mesh(this.progressGeo, progMat);
+          progMesh.position.set(b.x, b.y + 0.5, 0.9);
+          this.uiGroup.add(progMesh);
+          this.progressMeshes.set(b.id, progMesh);
+        } else {
+          // Update position always
+          progMesh.position.set(b.x, b.y + 0.5, 0.9);
+          
+          // Only update texture if progress changed significantly
+          if (needsTextureUpdate) {
+            const currentTex = (progMesh.material as THREE.MeshBasicMaterial).map;
+            const cachedTex = this.progressTextureCache.get(progressKey);
+            
+            if (cachedTex && currentTex !== cachedTex) {
+              // Dispose old texture if it's not cached
+              if (currentTex && !Array.from(this.progressTextureCache.values()).includes(currentTex as THREE.CanvasTexture)) {
+                currentTex.dispose();
+              }
+              (progMesh.material as THREE.MeshBasicMaterial).map = cachedTex;
+              (progMesh.material as THREE.MeshBasicMaterial).needsUpdate = true;
+            } else if (!cachedTex) {
+              // Create and cache new texture
+              const newTex = createProgressTexture(progress);
+              this.progressTextureCache.set(progressKey, newTex);
+              if (currentTex && !Array.from(this.progressTextureCache.values()).includes(currentTex as THREE.CanvasTexture)) {
+                currentTex.dispose();
+              }
+              (progMesh.material as THREE.MeshBasicMaterial).map = newTex;
+              (progMesh.material as THREE.MeshBasicMaterial).needsUpdate = true;
+            }
+          }
         }
-        const progTex = createProgressTexture(b.orderProgress / b.orderPrepTime);
-        const progMat = new THREE.MeshBasicMaterial({ map: progTex, transparent: true });
-        progMesh = new THREE.Mesh(this.progressGeo, progMat);
-        progMesh.position.set(b.x, b.y + 0.5, 0.9);
-        this.uiGroup.add(progMesh);
-        this.progressMeshes.set(b.id, progMesh);
       } else {
         const progMesh = this.progressMeshes.get(b.id);
         if (progMesh) {
           this.uiGroup.remove(progMesh);
-          (progMesh.material as THREE.MeshBasicMaterial).map?.dispose();
-          (progMesh.material as THREE.MeshBasicMaterial).dispose();
+          const mat = progMesh.material as THREE.MeshBasicMaterial;
+          // Don't dispose cached textures
+          if (mat.map && !Array.from(this.progressTextureCache.values()).includes(mat.map)) {
+            mat.map.dispose();
+          }
+          mat.dispose();
           this.progressMeshes.delete(b.id);
+          this.lastBaristaProgress.delete(b.id);
         }
       }
     }
@@ -816,10 +863,11 @@ class CafeRenderer {
         entry.bubble.visible = c.bubbleVisible;
         entry.bubble.position.set(c.x, c.y + 0.65, 0.85);
 
-        // Flash bubble red when patience is low
+        // Flash bubble red when patience is low (needs continuous rendering)
         if (c.bubbleVisible && c.patienceTimer < 8) {
           const flash = Math.sin(Date.now() / 166) > 0; // ~6Hz flash
           (entry.bubble.material as THREE.MeshBasicMaterial).color.set(flash ? 0xff8080 : 0xffffff);
+          this.needsRenderCallback?.(); // Force render for animation
         } else if (c.bubbleVisible) {
           (entry.bubble.material as THREE.MeshBasicMaterial).color.set(0xffffff);
         }
@@ -850,10 +898,18 @@ class CafeRenderer {
       mesh.position.set(p.x, p.y, 0.95);
       const opacity = Math.max(0, p.timer / p.maxTimer);
       (mesh.material as THREE.MeshBasicMaterial).opacity = opacity;
+      // Money popups animate, so we need continuous rendering
+      if (opacity > 0) {
+        this.needsRenderCallback?.();
+      }
     }
 
-    // Update stock HUD
-    this.updateStockHud(state);
+    // Update stock HUD only if stock changed
+    const stockKey = `${state.ingredientStock.coffeeBeans},${state.ingredientStock.milk},${state.cakeStock.map(c => `${c.name}:${c.stock}`).join(",")},${state.pendingOrderCount}`;
+    if (stockKey !== this.lastStockState) {
+      this.lastStockState = stockKey;
+      this.updateStockHud(state);
+    }
   }
 
   dispose() {
@@ -872,9 +928,18 @@ class CafeRenderer {
     }
     for (const [, mesh] of this.progressMeshes) {
       this.uiGroup.remove(mesh);
-      (mesh.material as THREE.MeshBasicMaterial).map?.dispose();
-      (mesh.material as THREE.MeshBasicMaterial).dispose();
+      const mat = mesh.material as THREE.MeshBasicMaterial;
+      // Dispose textures that aren't cached
+      if (mat.map && !Array.from(this.progressTextureCache.values()).includes(mat.map)) {
+        mat.map.dispose();
+      }
+      mat.dispose();
     }
+    // Dispose cached progress textures
+    for (const tex of this.progressTextureCache.values()) {
+      tex.dispose();
+    }
+    this.progressTextureCache.clear();
     for (const [, mesh] of this.popupMeshes) {
       this.uiGroup.remove(mesh);
       (mesh.material as THREE.MeshBasicMaterial).map?.dispose();
@@ -928,6 +993,8 @@ export default function CafeGame({ onStatsUpdate, onThoughtsUpdate, gameState, s
   const threeRendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const frameRef = useRef<number>(0);
   const lastStateRef = useRef<BroadcastState | null>(null);
+  const needsRenderRef = useRef<boolean>(true);
+  const lastRenderTimeRef = useRef<number>(0);
 
   const statsCallback = useCallback(
     (stats: GameStats) => onStatsUpdate?.(stats),
@@ -954,6 +1021,7 @@ export default function CafeGame({ onStatsUpdate, onThoughtsUpdate, gameState, s
       rendererRef.current.applyState(gameState);
       statsCallback(gameState.stats);
       thoughtsCallback(gameState.thoughts);
+      needsRenderRef.current = true; // Mark that we need to render
     }
   }, [gameState, statsCallback, thoughtsCallback]);
 
@@ -962,9 +1030,15 @@ export default function CafeGame({ onStatsUpdate, onThoughtsUpdate, gameState, s
     if (!container) return;
 
     // ── Three.js Setup ──
-    const threeRenderer = new THREE.WebGLRenderer({ antialias: false, alpha: false });
+    const threeRenderer = new THREE.WebGLRenderer({ 
+      antialias: false, 
+      alpha: false,
+      powerPreference: "high-performance",
+      stencil: false,
+      depth: false // We're using z-ordering via position, not depth buffer
+    });
     threeRenderer.setClearColor(0x0c0c14);
-    threeRenderer.setPixelRatio(1);
+    threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); // Cap at 2x for performance
     container.appendChild(threeRenderer.domElement);
     threeRendererRef.current = threeRenderer;
 
@@ -984,6 +1058,7 @@ export default function CafeGame({ onStatsUpdate, onThoughtsUpdate, gameState, s
 
     // ── Renderer (for applying state) ──
     const cafeRenderer = new CafeRenderer(scene);
+    cafeRenderer.needsRenderCallback = () => { needsRenderRef.current = true; };
     rendererRef.current = cafeRenderer;
 
     // Apply current state if we already have one
@@ -1026,9 +1101,21 @@ export default function CafeGame({ onStatsUpdate, onThoughtsUpdate, gameState, s
     resizeObs.observe(container);
     resize();
 
-    // ── Render Loop (just renders, no game logic) ──
+    // ── Optimized Render Loop ──
+    // Only render when state changes or for smooth animations (money popups, etc.)
     const animate = () => {
-      threeRenderer.render(scene, camera);
+      const now = performance.now();
+      const timeSinceLastRender = now - lastRenderTimeRef.current;
+      
+      // Always render if we have pending state updates
+      // Or render at least 30fps for smooth animations (money popups, progress bars)
+      if (needsRenderRef.current || timeSinceLastRender >= 33) {
+        threeRenderer.render(scene, camera);
+        needsRenderRef.current = false;
+        lastRenderTimeRef.current = now;
+      }
+      
+      // Schedule next frame
       frameRef.current = requestAnimationFrame(animate);
     };
     frameRef.current = requestAnimationFrame(animate);

@@ -1,37 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import {
-  MessageCircle,
-  Brain,
-  Send,
-  Sparkles,
-  Bot,
-  User,
-  ChevronDown,
-} from "lucide-react";
-import type { GameStats, AIThought } from "@/game/types";
-
-type Tab = "chat" | "thoughts";
-
-interface ChatMessage {
-  id: number;
-  user: string;
-  message: string;
-  time: string;
-  isSystem?: boolean;
-}
-
-const mockChat: ChatMessage[] = [
-  { id: 1, user: "cryptoKing42", message: "Just tuned in, how's the cafe doing?", time: "2m ago" },
-  { id: 2, user: "System", message: "AI purchased a new espresso machine for $2,400", time: "1m ago", isSystem: true },
-  { id: 3, user: "coffeeAddict", message: "Wow the revenue is insane today", time: "1m ago" },
-  { id: 4, user: "baristaFan", message: "It just hired another barista! smart move", time: "45s ago" },
-  { id: 5, user: "web3wizard", message: "The AI is so good at this game lol", time: "30s ago" },
-  { id: 6, user: "System", message: "New menu item unlocked: Caramel Macchiato", time: "20s ago", isSystem: true },
-  { id: 7, user: "moonboy", message: "$CAFE to the moon!", time: "10s ago" },
-  { id: 8, user: "degenTrader", message: "This is the most entertaining thing I've watched today", time: "5s ago" },
-];
+import { Brain, Bot } from "lucide-react";
+import type { AIThought } from "@/game/types";
 
 const typeColors: Record<string, { border: string; bg: string; text: string }> = {
   strategy: { border: "border-blue-400/50", bg: "bg-blue-400/10", text: "text-blue-400" },
@@ -49,128 +19,23 @@ const typeLabels: Record<string, string> = {
 
 interface SidePanelProps {
   thoughts: AIThought[];
-  stats: GameStats;
-  viewerCount?: number;
 }
 
-export default function SidePanel({ thoughts, stats, viewerCount = 0 }: SidePanelProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("chat");
-
+export default function SidePanel({ thoughts }: SidePanelProps) {
   return (
     <div className="flex flex-col h-full border-l-2 border-border-bright bg-card">
-      {/* Tab switcher */}
-      <div className="flex border-b-2 border-border-bright">
-        <button
-          onClick={() => setActiveTab("chat")}
-          className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 font-silk text-sm relative ${
-            activeTab === "chat"
-              ? "text-accent-light bg-accent/10"
-              : "text-muted hover:text-muted-light hover:bg-card-hover"
-          }`}
-        >
-          <MessageCircle className="w-4 h-4" />
-          <span>Chat</span>
-          <span className="font-pixel text-[7px] px-1.5 py-0.5 bg-accent/20 text-accent-light border border-accent/30">
-            24
-          </span>
-          {activeTab === "chat" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-light" />
-          )}
-        </button>
-        <div className="w-0.5 bg-border-bright" />
-        <button
-          onClick={() => setActiveTab("thoughts")}
-          className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 font-silk text-sm relative ${
-            activeTab === "thoughts"
-              ? "text-accent-light bg-accent/10"
-              : "text-muted hover:text-muted-light hover:bg-card-hover"
-          }`}
-        >
-          <Brain className="w-4 h-4" />
-          <span>AI Thoughts</span>
-          <div className="w-2 h-2 bg-success animate-blink" />
-          {activeTab === "thoughts" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent-light" />
-          )}
-        </button>
+      {/* Header */}
+      <div className="flex items-center justify-center gap-2 px-3 py-2.5 border-b-2 border-border-bright">
+        <Brain className="w-4 h-4 text-accent-light" />
+        <span className="font-silk text-sm text-accent-light">AI Thoughts</span>
+        <div className="w-2 h-2 bg-success animate-blink" />
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-hidden flex flex-col">
-        {activeTab === "chat" ? (
-          <ChatPanel stats={stats} viewerCount={viewerCount} />
-        ) : (
-          <ThoughtsPanel thoughts={thoughts} />
-        )}
+        <ThoughtsPanel thoughts={thoughts} />
       </div>
     </div>
-  );
-}
-
-function ChatPanel({ stats, viewerCount = 0 }: { stats: GameStats; viewerCount?: number }) {
-  return (
-    <>
-      <div className="flex-1 overflow-y-auto p-2.5 space-y-0.5">
-        {mockChat.map((msg) => (
-          <div key={msg.id} className={`animate-slide-up ${msg.isSystem ? "my-1.5" : ""}`}>
-            {msg.isSystem ? (
-              <div className="flex items-center gap-2 px-2.5 py-2 bg-accent/8 border-2 border-accent/20 text-xs">
-                <Sparkles className="w-3 h-3 text-accent-light shrink-0" />
-                <span className="font-silk text-accent-light text-xs">{msg.message}</span>
-                <span className="font-pixel text-[6px] text-muted ml-auto shrink-0">{msg.time}</span>
-              </div>
-            ) : (
-              <div className="flex items-start gap-2 px-2 py-1.5 hover:bg-border/20 group">
-                <div className="w-6 h-6 bg-border-bright border border-border-bright flex items-center justify-center shrink-0 mt-0.5">
-                  <User className="w-3 h-3 text-muted" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-silk text-xs font-bold text-accent-light">{msg.user}</span>
-                    <span className="font-pixel text-[6px] text-muted opacity-0 group-hover:opacity-100">{msg.time}</span>
-                  </div>
-                  <p className="font-silk text-sm text-foreground/85 leading-relaxed break-words">{msg.message}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-
-        {/* Live game events */}
-        {stats.customersServed > 0 && (
-          <div className="my-1.5 animate-slide-up">
-            <div className="flex items-center gap-2 px-2.5 py-2 bg-success/8 border-2 border-success/20 text-xs">
-              <Sparkles className="w-3 h-3 text-success shrink-0" />
-              <span className="font-silk text-success text-xs">
-                {stats.customersServed} customers served | ${stats.revenue.toFixed(0)} revenue
-              </span>
-              <span className="font-pixel text-[6px] text-muted ml-auto shrink-0">LIVE</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Viewer count */}
-      <div className="px-3 py-1.5 border-t-2 border-border flex items-center gap-1.5">
-        <div className="w-2 h-2 bg-success animate-blink" />
-        <span className="font-pixel text-[6px] text-muted-light">{viewerCount.toLocaleString()} VIEWER{viewerCount !== 1 ? "S" : ""}</span>
-        <ChevronDown className="w-3 h-3 text-muted ml-auto" />
-      </div>
-
-      {/* Chat input */}
-      <div className="p-2.5 border-t-2 border-border-bright">
-        <div className="flex items-center gap-2 bg-input-bg px-3 py-2 border-2 border-border-bright focus-within:border-accent/50">
-          <input
-            type="text"
-            placeholder="Type a message..."
-            className="flex-1 bg-transparent font-silk text-sm text-foreground placeholder:text-muted outline-none"
-          />
-          <button className="p-1.5 bg-accent hover:bg-accent-light text-background border-2 border-accent-dark pixel-shadow-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none">
-            <Send className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-    </>
   );
 }
 
@@ -202,6 +67,11 @@ function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
             <div className="flex items-center gap-2 mt-2.5">
               <ThoughtTag type={currentThought.type} />
               <span className="font-pixel text-[6px] text-muted">{currentThought.time}</span>
+              {currentThought.cost !== undefined && (
+                <span className="font-pixel text-[6px] text-accent-light ml-auto px-1.5 py-0.5 bg-accent/10 border border-accent/20">
+                  ${currentThought.cost.toFixed(4)}
+                </span>
+              )}
             </div>
           </div>
         ) : (
@@ -232,6 +102,11 @@ function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
             <div className="flex items-center gap-2 mt-2">
               <ThoughtTag type={thought.type} />
               <span className="font-pixel text-[6px] text-muted">{thought.time}</span>
+              {thought.cost !== undefined && (
+                <span className="font-pixel text-[6px] text-accent-light ml-auto px-1.5 py-0.5 bg-accent/10 border border-accent/20">
+                  ${thought.cost.toFixed(4)}
+                </span>
+              )}
             </div>
           </div>
         ))}
