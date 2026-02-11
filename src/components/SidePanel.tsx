@@ -50,9 +50,10 @@ const typeLabels: Record<string, string> = {
 interface SidePanelProps {
   thoughts: AIThought[];
   stats: GameStats;
+  viewerCount?: number;
 }
 
-export default function SidePanel({ thoughts, stats }: SidePanelProps) {
+export default function SidePanel({ thoughts, stats, viewerCount = 0 }: SidePanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
 
   return (
@@ -97,7 +98,7 @@ export default function SidePanel({ thoughts, stats }: SidePanelProps) {
       {/* Content */}
       <div className="flex-1 overflow-hidden flex flex-col">
         {activeTab === "chat" ? (
-          <ChatPanel stats={stats} />
+          <ChatPanel stats={stats} viewerCount={viewerCount} />
         ) : (
           <ThoughtsPanel thoughts={thoughts} />
         )}
@@ -106,7 +107,7 @@ export default function SidePanel({ thoughts, stats }: SidePanelProps) {
   );
 }
 
-function ChatPanel({ stats }: { stats: GameStats }) {
+function ChatPanel({ stats, viewerCount = 0 }: { stats: GameStats; viewerCount?: number }) {
   return (
     <>
       <div className="flex-1 overflow-y-auto p-2.5 space-y-0.5">
@@ -152,7 +153,7 @@ function ChatPanel({ stats }: { stats: GameStats }) {
       {/* Viewer count */}
       <div className="px-3 py-1.5 border-t-2 border-border flex items-center gap-1.5">
         <div className="w-2 h-2 bg-success animate-blink" />
-        <span className="font-pixel text-[6px] text-muted-light">1,247 VIEWERS</span>
+        <span className="font-pixel text-[6px] text-muted-light">{viewerCount.toLocaleString()} VIEWER{viewerCount !== 1 ? "S" : ""}</span>
         <ChevronDown className="w-3 h-3 text-muted ml-auto" />
       </div>
 

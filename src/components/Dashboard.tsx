@@ -1,11 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { io, Socket } from "socket.io-client";
 import Header from "./Header";
 import GameEmbed from "./GameEmbed";
 import SidePanel from "./SidePanel";
 import StatsBar from "./StatsBar";
 import type { GameStats, AIThought } from "@/game/types";
+import type { BroadcastState } from "@/game/CafeGame";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
 const defaultStats: GameStats = {
   coffeeSold: 0,
@@ -39,13 +43,66 @@ const defaultStats: GameStats = {
 export default function Dashboard() {
   const [stats, setStats] = useState<GameStats>(defaultStats);
   const [thoughts, setThoughts] = useState<AIThought[]>([]);
+  const [gameState, setGameState] = useState<BroadcastState | null>(null);
+  const [soundEvents, setSoundEvents] = useState<string[]>([]);
+  const [viewerCount, setViewerCount] = useState(0);
+  const [connected, setConnected] = useState(false);
+  const socketRef = useRef<Socket | null>(null);
 
   const handleStatsUpdate = useCallback((s: GameStats) => setStats(s), []);
   const handleThoughtsUpdate = useCallback((t: AIThought[]) => setThoughts(t), []);
 
+  // WebSocket connection
+  useEffect(() => {
+    const socket = io(BACKEND_URL, {
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: Infinity,
+    });
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      console.log("[WS] Connected to backend");
+      setConnected(true);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("[WS] Disconnected from backend");
+      setConnected(false);
+    });
+
+    socket.on("connected", (data: { viewerCount: number }) => {
+      setViewerCount(data.viewerCount);
+    });
+
+    socket.on("gameState", (state: BroadcastState) => {
+      setGameState(state);
+      if (state.viewerCount !== undefined) {
+        setViewerCount(state.viewerCount);
+      }
+    });
+
+    socket.on("viewerCount", (count: number) => {
+      setViewerCount(count);
+    });
+
+    socket.on("soundEffect", (sound: string) => {
+      setSoundEvents(prev => [...prev, sound]);
+      // Clear sound events after a short delay
+      setTimeout(() => {
+        setSoundEvents(prev => prev.slice(1));
+      }, 100);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
-      <Header stats={stats} />
+      <Header stats={stats} viewerCount={viewerCount} connected={connected} />
 
       <div className="flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -53,13 +110,16 @@ export default function Dashboard() {
             <GameEmbed
               onStatsUpdate={handleStatsUpdate}
               onThoughtsUpdate={handleThoughtsUpdate}
+              gameState={gameState}
+              soundEvents={soundEvents}
+              connected={connected}
             />
           </div>
           <StatsBar stats={stats} />
         </div>
 
         <div className="w-[380px] shrink-0 hidden lg:flex">
-          <SidePanel thoughts={thoughts} stats={stats} />
+          <SidePanel thoughts={thoughts} stats={stats} viewerCount={viewerCount} />
         </div>
       </div>
     </div>

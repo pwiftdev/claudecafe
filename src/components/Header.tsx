@@ -6,9 +6,11 @@ import type { GameStats } from "@/game/types";
 
 interface HeaderProps {
   stats: GameStats;
+  viewerCount?: number;
+  connected?: boolean;
 }
 
-export default function Header({ stats }: HeaderProps) {
+export default function Header({ stats, viewerCount = 0, connected = false }: HeaderProps) {
   return (
     <header className="flex items-center justify-between px-4 py-2 border-b-2 border-border-bright bg-card sticky top-0 z-50">
       <div className="flex items-center gap-3">
@@ -44,7 +46,7 @@ export default function Header({ stats }: HeaderProps) {
           </div>
           <div className="flex items-center gap-1.5">
             <Users className="w-3.5 h-3.5 text-accent" />
-            <span>1,247 watching</span>
+            <span>{viewerCount.toLocaleString()} watching</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Globe className="w-3.5 h-3.5 text-accent" />
