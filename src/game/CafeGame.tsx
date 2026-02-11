@@ -809,8 +809,11 @@ class CafeRenderer {
           this.uiGroup.remove(progMesh);
           const mat = progMesh.material as THREE.MeshBasicMaterial;
           // Don't dispose cached textures
-          if (mat.map && !Array.from(this.progressTextureCache.values()).includes(mat.map)) {
-            mat.map.dispose();
+          if (mat.map) {
+            const tex = mat.map as THREE.CanvasTexture;
+            if (!Array.from(this.progressTextureCache.values()).includes(tex)) {
+              tex.dispose();
+            }
           }
           mat.dispose();
           this.progressMeshes.delete(b.id);
@@ -930,8 +933,11 @@ class CafeRenderer {
       this.uiGroup.remove(mesh);
       const mat = mesh.material as THREE.MeshBasicMaterial;
       // Dispose textures that aren't cached
-      if (mat.map && !Array.from(this.progressTextureCache.values()).includes(mat.map)) {
-        mat.map.dispose();
+      if (mat.map) {
+        const tex = mat.map as THREE.CanvasTexture;
+        if (!Array.from(this.progressTextureCache.values()).includes(tex)) {
+          tex.dispose();
+        }
       }
       mat.dispose();
     }
