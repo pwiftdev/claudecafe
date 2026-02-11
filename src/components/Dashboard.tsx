@@ -6,6 +6,7 @@ import Header from "./Header";
 import GameEmbed from "./GameEmbed";
 import SidePanel from "./SidePanel";
 import StatsBar from "./StatsBar";
+import WelcomeModal from "./WelcomeModal";
 import type { GameStats, AIThought } from "@/game/types";
 import type { BroadcastState } from "@/game/CafeGame";
 
@@ -107,8 +108,10 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-background">
-      <Header stats={stats} viewerCount={viewerCount} connected={connected} />
+    <>
+      <WelcomeModal />
+      <div className="flex flex-col h-screen overflow-hidden bg-background">
+        <Header stats={stats} viewerCount={viewerCount} connected={connected} />
 
       {/* Desktop Layout */}
       <div className="hidden lg:flex flex-1 overflow-hidden">
@@ -120,6 +123,7 @@ export default function Dashboard() {
               gameState={gameState}
               soundEvents={soundEvents}
               connected={connected}
+              stats={stats}
             />
           </div>
           <StatsBar stats={stats} />
@@ -140,6 +144,7 @@ export default function Dashboard() {
             gameState={gameState}
             soundEvents={soundEvents}
             connected={connected}
+            stats={stats}
           />
         </div>
 
@@ -152,5 +157,6 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
+    </>
   );
 }
