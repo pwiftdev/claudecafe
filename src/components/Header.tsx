@@ -2,8 +2,13 @@
 
 import Image from "next/image";
 import { Zap, Users, Globe } from "lucide-react";
+import type { GameStats } from "@/game/types";
 
-export default function Header() {
+interface HeaderProps {
+  stats: GameStats;
+}
+
+export default function Header({ stats }: HeaderProps) {
   return (
     <header className="flex items-center justify-between px-4 py-2 border-b-2 border-border-bright bg-card sticky top-0 z-50">
       <div className="flex items-center gap-3">
@@ -25,7 +30,6 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-5">
-        {/* Live indicator */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1 px-2.5 py-1 bg-live-pulse/15 border-2 border-live-pulse/40 pixel-shadow-sm">
             <div className="w-2 h-2 bg-live-pulse animate-blink" />
@@ -33,11 +37,10 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Meta stats */}
         <div className="hidden md:flex items-center gap-4 font-silk text-xs text-muted-light">
           <div className="flex items-center gap-1.5">
             <Zap className="w-3.5 h-3.5 text-accent" />
-            <span>Day 47</span>
+            <span>Day {stats.day}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Users className="w-3.5 h-3.5 text-accent" />
@@ -45,7 +48,7 @@ export default function Header() {
           </div>
           <div className="flex items-center gap-1.5">
             <Globe className="w-3.5 h-3.5 text-accent" />
-            <span>Uptime: 23h 14m</span>
+            <span>${stats.revenue.toLocaleString()}</span>
           </div>
         </div>
       </div>

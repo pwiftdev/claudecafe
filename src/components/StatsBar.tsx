@@ -12,6 +12,7 @@ import {
   Flame,
   Heart,
 } from "lucide-react";
+import type { GameStats } from "@/game/types";
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -52,75 +53,77 @@ function StatCard({ icon, label, value, change, positive }: StatCardProps) {
   );
 }
 
-export default function StatsBar() {
-  const stats: StatCardProps[] = [
+interface StatsBarProps {
+  stats: GameStats;
+}
+
+export default function StatsBar({ stats }: StatsBarProps) {
+  const statCards: StatCardProps[] = [
     {
       icon: <Coffee className="w-4 h-4" />,
       label: "Coffee Sold",
-      value: "12,847",
-      change: "+234",
+      value: stats.coffeeSold.toLocaleString(),
+      change: stats.coffeeSold > 0 ? `+${stats.coffeeSold}` : undefined,
       positive: true,
     },
     {
       icon: <CakeSlice className="w-4 h-4" />,
       label: "Cakes Sold",
-      value: "3,421",
-      change: "+67",
+      value: stats.cakesSold.toLocaleString(),
+      change: stats.cakesSold > 0 ? `+${stats.cakesSold}` : undefined,
       positive: true,
     },
     {
       icon: <DollarSign className="w-4 h-4" />,
       label: "Revenue",
-      value: "$48,293",
-      change: "+12.4%",
+      value: `$${stats.revenue.toLocaleString()}`,
+      change: stats.revenue > 0 ? `+$${stats.revenue.toFixed(0)}` : undefined,
       positive: true,
     },
     {
       icon: <Users className="w-4 h-4" />,
       label: "Baristas",
-      value: "8",
-      change: "+1",
+      value: String(stats.baristasCount),
+      change: stats.baristasCount > 1 ? `+${stats.baristasCount - 1}` : undefined,
       positive: true,
     },
     {
       icon: <Star className="w-4 h-4" />,
       label: "Rating",
-      value: "4.7",
-      change: "+0.2",
-      positive: true,
+      value: stats.rating.toFixed(1),
+      change: stats.rating >= 4.0 ? "GOOD" : "LOW",
+      positive: stats.rating >= 4.0,
     },
     {
       icon: <Heart className="w-4 h-4" />,
       label: "Customers",
-      value: "2,156",
-      change: "+89",
+      value: stats.customersServed.toLocaleString(),
+      change: stats.customersServed > 0 ? `+${stats.customersServed}` : undefined,
       positive: true,
     },
     {
       icon: <ShoppingBag className="w-4 h-4" />,
       label: "Orders Today",
-      value: "347",
-      change: "-12",
-      positive: false,
+      value: String(stats.ordersToday),
     },
     {
       icon: <TrendingUp className="w-4 h-4" />,
       label: "Profit Margin",
-      value: "34.2%",
-      change: "+2.1%",
-      positive: true,
+      value: `${stats.profitMargin}%`,
+      change: stats.profitMargin > 30 ? "HEALTHY" : undefined,
+      positive: stats.profitMargin > 30,
     },
     {
       icon: <Flame className="w-4 h-4" />,
       label: "Streak",
-      value: "14 days",
+      value: `${stats.streak} days`,
     },
     {
       icon: <Clock className="w-4 h-4" />,
       label: "Avg Wait",
-      value: "2.3m",
-      change: "-0.4m",
-      positive: true,
+      value: `${stats.avgWaitTime}s`,
+      change: stats.avgWaitTime > 0 && stats.avgWaitTime < 10 ? "FAST" : stats.avgWaitTime >= 10 ? "SLOW" : undefined,
+      positive: stats.avgWaitTime < 10,
     },
   ];
 
@@ -131,13 +134,19 @@ export default function StatsBar() {
         <h2 className="font-pixel text-[8px] text-accent-light uppercase tracking-wider">
           Game Stats
         </h2>
-        <div className="flex-1 h-0.5 bg-border-bright" style={{ backgroundImage: "repeating-linear-gradient(90deg, var(--color-border-bright) 0px, var(--color-border-bright) 4px, transparent 4px, transparent 8px)" }} />
-        <span className="font-pixel text-[6px] text-muted animate-pulse-glow">
+        <div
+          className="flex-1 h-0.5"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, var(--color-border-bright) 0px, var(--color-border-bright) 4px, transparent 4px, transparent 8px)",
+          }}
+        />
+        <span className="font-pixel text-[6px] text-success animate-pulse-glow">
           LIVE
         </span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-        {stats.map((stat, i) => (
+        {statCards.map((stat, i) => (
           <StatCard key={i} {...stat} />
         ))}
       </div>

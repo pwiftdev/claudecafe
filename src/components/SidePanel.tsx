@@ -10,6 +10,7 @@ import {
   User,
   ChevronDown,
 } from "lucide-react";
+import type { GameStats, AIThought } from "@/game/types";
 
 type Tab = "chat" | "thoughts";
 
@@ -21,97 +22,15 @@ interface ChatMessage {
   isSystem?: boolean;
 }
 
-interface Thought {
-  id: number;
-  text: string;
-  time: string;
-  type: "strategy" | "observation" | "decision" | "reflection";
-}
-
 const mockChat: ChatMessage[] = [
-  {
-    id: 1,
-    user: "cryptoKing42",
-    message: "Just tuned in, how's the cafe doing?",
-    time: "2m ago",
-  },
-  {
-    id: 2,
-    user: "System",
-    message: "AI purchased a new espresso machine for $2,400",
-    time: "1m ago",
-    isSystem: true,
-  },
-  {
-    id: 3,
-    user: "coffeeAddict",
-    message: "Wow the revenue is insane today",
-    time: "1m ago",
-  },
-  {
-    id: 4,
-    user: "baristaFan",
-    message: "It just hired another barista! smart move",
-    time: "45s ago",
-  },
-  {
-    id: 5,
-    user: "web3wizard",
-    message: "The AI is so good at this game lol",
-    time: "30s ago",
-  },
-  {
-    id: 6,
-    user: "System",
-    message: "New menu item unlocked: Caramel Macchiato",
-    time: "20s ago",
-    isSystem: true,
-  },
-  {
-    id: 7,
-    user: "moonboy",
-    message: "$CAFE to the moon!",
-    time: "10s ago",
-  },
-  {
-    id: 8,
-    user: "degenTrader",
-    message: "This is the most entertaining thing I've watched today",
-    time: "5s ago",
-  },
-];
-
-const mockThoughts: Thought[] = [
-  {
-    id: 1,
-    text: "Customer satisfaction is at 87%. I should focus on reducing wait times before expanding the menu further. Hiring one more barista could help with the morning rush.",
-    time: "30s ago",
-    type: "observation",
-  },
-  {
-    id: 2,
-    text: "The new espresso machine investment should pay for itself within 3 game-days based on current order volume. Good ROI decision.",
-    time: "1m ago",
-    type: "reflection",
-  },
-  {
-    id: 3,
-    text: "Deciding between upgrading the seating area ($3,200) or adding a drive-through window ($5,800). The drive-through has a higher long-term return, but seating upgrades will boost satisfaction immediately...",
-    time: "2m ago",
-    type: "decision",
-  },
-  {
-    id: 4,
-    text: "I notice cake sales drop by 30% after 3 PM. I should consider adding afternoon specials or a happy hour discount to boost late-day revenue.",
-    time: "4m ago",
-    type: "strategy",
-  },
-  {
-    id: 5,
-    text: "Revenue trend is strongly positive. We've grown 12.4% since yesterday. The key driver is the premium coffee menu items -- customers are willing to pay more for specialty drinks.",
-    time: "6m ago",
-    type: "observation",
-  },
+  { id: 1, user: "cryptoKing42", message: "Just tuned in, how's the cafe doing?", time: "2m ago" },
+  { id: 2, user: "System", message: "AI purchased a new espresso machine for $2,400", time: "1m ago", isSystem: true },
+  { id: 3, user: "coffeeAddict", message: "Wow the revenue is insane today", time: "1m ago" },
+  { id: 4, user: "baristaFan", message: "It just hired another barista! smart move", time: "45s ago" },
+  { id: 5, user: "web3wizard", message: "The AI is so good at this game lol", time: "30s ago" },
+  { id: 6, user: "System", message: "New menu item unlocked: Caramel Macchiato", time: "20s ago", isSystem: true },
+  { id: 7, user: "moonboy", message: "$CAFE to the moon!", time: "10s ago" },
+  { id: 8, user: "degenTrader", message: "This is the most entertaining thing I've watched today", time: "5s ago" },
 ];
 
 const typeColors: Record<string, { border: string; bg: string; text: string }> = {
@@ -128,7 +47,12 @@ const typeLabels: Record<string, string> = {
   reflection: "REFLECT",
 };
 
-export default function SidePanel() {
+interface SidePanelProps {
+  thoughts: AIThought[];
+  stats: GameStats;
+}
+
+export default function SidePanel({ thoughts, stats }: SidePanelProps) {
   const [activeTab, setActiveTab] = useState<Tab>("chat");
 
   return (
@@ -172,28 +96,27 @@ export default function SidePanel() {
 
       {/* Content */}
       <div className="flex-1 overflow-hidden flex flex-col">
-        {activeTab === "chat" ? <ChatPanel /> : <ThoughtsPanel />}
+        {activeTab === "chat" ? (
+          <ChatPanel stats={stats} />
+        ) : (
+          <ThoughtsPanel thoughts={thoughts} />
+        )}
       </div>
     </div>
   );
 }
 
-function ChatPanel() {
+function ChatPanel({ stats }: { stats: GameStats }) {
   return (
     <>
       <div className="flex-1 overflow-y-auto p-2.5 space-y-0.5">
         {mockChat.map((msg) => (
-          <div
-            key={msg.id}
-            className={`animate-slide-up ${msg.isSystem ? "my-1.5" : ""}`}
-          >
+          <div key={msg.id} className={`animate-slide-up ${msg.isSystem ? "my-1.5" : ""}`}>
             {msg.isSystem ? (
               <div className="flex items-center gap-2 px-2.5 py-2 bg-accent/8 border-2 border-accent/20 text-xs">
                 <Sparkles className="w-3 h-3 text-accent-light shrink-0" />
                 <span className="font-silk text-accent-light text-xs">{msg.message}</span>
-                <span className="font-pixel text-[6px] text-muted ml-auto shrink-0">
-                  {msg.time}
-                </span>
+                <span className="font-pixel text-[6px] text-muted ml-auto shrink-0">{msg.time}</span>
               </div>
             ) : (
               <div className="flex items-start gap-2 px-2 py-1.5 hover:bg-border/20 group">
@@ -202,21 +125,28 @@ function ChatPanel() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-silk text-xs font-bold text-accent-light">
-                      {msg.user}
-                    </span>
-                    <span className="font-pixel text-[6px] text-muted opacity-0 group-hover:opacity-100">
-                      {msg.time}
-                    </span>
+                    <span className="font-silk text-xs font-bold text-accent-light">{msg.user}</span>
+                    <span className="font-pixel text-[6px] text-muted opacity-0 group-hover:opacity-100">{msg.time}</span>
                   </div>
-                  <p className="font-silk text-sm text-foreground/85 leading-relaxed break-words">
-                    {msg.message}
-                  </p>
+                  <p className="font-silk text-sm text-foreground/85 leading-relaxed break-words">{msg.message}</p>
                 </div>
               </div>
             )}
           </div>
         ))}
+
+        {/* Live game events */}
+        {stats.customersServed > 0 && (
+          <div className="my-1.5 animate-slide-up">
+            <div className="flex items-center gap-2 px-2.5 py-2 bg-success/8 border-2 border-success/20 text-xs">
+              <Sparkles className="w-3 h-3 text-success shrink-0" />
+              <span className="font-silk text-success text-xs">
+                {stats.customersServed} customers served | ${stats.revenue.toFixed(0)} revenue
+              </span>
+              <span className="font-pixel text-[6px] text-muted ml-auto shrink-0">LIVE</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Viewer count */}
@@ -243,74 +173,82 @@ function ChatPanel() {
   );
 }
 
-function ThoughtsPanel() {
+function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
+  const currentThought = thoughts[0];
+  const historyThoughts = thoughts.slice(1);
+
   return (
     <>
-      {/* Current thought (featured) */}
+      {/* Current thought */}
       <div className="p-2.5 border-b-2 border-border-bright">
         <div className="flex items-center gap-2 mb-2">
           <div className="relative">
             <Bot className="w-5 h-5 text-accent-light" />
             <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-success animate-blink" />
           </div>
-          <span className="font-pixel text-[7px] text-accent-light">
-            CLAUDE IS THINKING
-          </span>
+          <span className="font-pixel text-[7px] text-accent-light">CLAUDE IS THINKING</span>
           <div className="flex gap-1 ml-1">
             <div className="typing-dot w-1.5 h-1.5 bg-accent-light" />
             <div className="typing-dot w-1.5 h-1.5 bg-accent-light" />
             <div className="typing-dot w-1.5 h-1.5 bg-accent-light" />
           </div>
         </div>
-        <div className="p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm">
-          <p className="font-silk text-sm text-foreground/90 leading-relaxed">
-            {mockThoughts[0].text}
-          </p>
-          <div className="flex items-center gap-2 mt-2.5">
-            <ThoughtTag type={mockThoughts[0].type} />
-            <span className="font-pixel text-[6px] text-muted">
-              {mockThoughts[0].time}
-            </span>
+        {currentThought ? (
+          <div className="p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm">
+            <p className="font-silk text-sm text-foreground/90 leading-relaxed">
+              {currentThought.text}
+            </p>
+            <div className="flex items-center gap-2 mt-2.5">
+              <ThoughtTag type={currentThought.type} />
+              <span className="font-pixel text-[6px] text-muted">{currentThought.time}</span>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm">
+            <p className="font-silk text-sm text-muted-light">Initializing cafe strategy...</p>
+          </div>
+        )}
       </div>
 
-      {/* Thought history */}
+      {/* History */}
       <div className="flex-1 overflow-y-auto p-2.5 space-y-2">
         <div className="flex items-center gap-2 mb-1">
-          <span className="font-pixel text-[7px] text-muted uppercase tracking-wider">
-            History
-          </span>
-          <div className="flex-1 h-0.5" style={{ backgroundImage: "repeating-linear-gradient(90deg, var(--color-border-bright) 0px, var(--color-border-bright) 3px, transparent 3px, transparent 6px)" }} />
+          <span className="font-pixel text-[7px] text-muted uppercase tracking-wider">History</span>
+          <div
+            className="flex-1 h-0.5"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(90deg, var(--color-border-bright) 0px, var(--color-border-bright) 3px, transparent 3px, transparent 6px)",
+            }}
+          />
         </div>
-        {mockThoughts.slice(1).map((thought) => (
+        {historyThoughts.map((thought) => (
           <div
             key={thought.id}
             className="p-2.5 bg-chat-bg border-2 border-border hover:border-border-bright animate-slide-up"
           >
-            <p className="font-silk text-sm text-foreground/75 leading-relaxed">
-              {thought.text}
-            </p>
+            <p className="font-silk text-sm text-foreground/75 leading-relaxed">{thought.text}</p>
             <div className="flex items-center gap-2 mt-2">
               <ThoughtTag type={thought.type} />
-              <span className="font-pixel text-[6px] text-muted">
-                {thought.time}
-              </span>
+              <span className="font-pixel text-[6px] text-muted">{thought.time}</span>
             </div>
           </div>
         ))}
+        {historyThoughts.length === 0 && (
+          <p className="font-silk text-xs text-muted text-center py-4">
+            Thoughts will appear as the AI plays...
+          </p>
+        )}
       </div>
     </>
   );
 }
 
 function ThoughtTag({ type }: { type: string }) {
-  const colors = typeColors[type];
+  const colors = typeColors[type] || typeColors.observation;
   return (
-    <span
-      className={`font-pixel text-[6px] px-2 py-0.5 border-2 ${colors.border} ${colors.bg} ${colors.text}`}
-    >
-      {typeLabels[type]}
+    <span className={`font-pixel text-[6px] px-2 py-0.5 border-2 ${colors.border} ${colors.bg} ${colors.text}`}>
+      {typeLabels[type] || type.toUpperCase()}
     </span>
   );
 }

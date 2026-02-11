@@ -1,9 +1,15 @@
 "use client";
 
-import Image from "next/image";
 import { Monitor, Maximize2, Volume2 } from "lucide-react";
+import CafeGame from "@/game/CafeGame";
+import type { GameStats, AIThought } from "@/game/types";
 
-export default function GameEmbed() {
+interface GameEmbedProps {
+  onStatsUpdate: (stats: GameStats) => void;
+  onThoughtsUpdate: (thoughts: AIThought[]) => void;
+}
+
+export default function GameEmbed({ onStatsUpdate, onThoughtsUpdate }: GameEmbedProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Game toolbar */}
@@ -25,40 +31,21 @@ export default function GameEmbed() {
         </div>
       </div>
 
-      {/* Game embed area */}
-      <div className="flex-1 relative bg-[#08080e] flex items-center justify-center min-h-[350px] crt-glow">
-        {/* Placeholder for game embed */}
-        <div className="flex flex-col items-center gap-5 text-muted">
-          <div className="relative">
-            <div className="w-28 h-28 bg-card pixel-border pixel-shadow flex items-center justify-center">
-              <Image
-                src="/cclogo.png"
-                alt="ClaudeCafe"
-                width={64}
-                height={64}
-                className="pixel-render opacity-50"
-              />
-            </div>
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-live-pulse animate-blink" />
-          </div>
-          <div className="text-center">
-            <p className="font-pixel text-[9px] text-muted-light leading-relaxed">
-              GAME EMBED AREA
-            </p>
-            <p className="font-silk text-xs text-muted mt-2">
-              Cafe Tycoon will render here
-            </p>
-          </div>
-        </div>
+      {/* Game canvas */}
+      <div className="flex-1 relative bg-[#08080e] min-h-[300px]">
+        <CafeGame
+          onStatsUpdate={onStatsUpdate}
+          onThoughtsUpdate={onThoughtsUpdate}
+        />
 
         {/* CRT scanline overlay */}
-        <div className="absolute inset-0 pointer-events-none crt-scanlines opacity-30" />
+        <div className="absolute inset-0 pointer-events-none crt-scanlines opacity-20" />
 
         {/* Corner decorations */}
-        <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-accent/20" />
-        <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-accent/20" />
-        <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-accent/20" />
-        <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-accent/20" />
+        <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-accent/20 pointer-events-none" />
+        <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-accent/20 pointer-events-none" />
+        <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-accent/20 pointer-events-none" />
+        <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-accent/20 pointer-events-none" />
       </div>
     </div>
   );
