@@ -48,7 +48,7 @@ export default function Header({ stats }: HeaderProps) {
           </div>
           <div className="flex items-center gap-1.5">
             <Globe className="w-3.5 h-3.5 text-accent" />
-            <span>${stats.revenue.toLocaleString()}</span>
+            <span>${(stats.money ?? stats.revenue).toLocaleString()}</span>
           </div>
         </div>
       </div>

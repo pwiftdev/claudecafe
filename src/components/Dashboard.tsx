@@ -19,6 +19,21 @@ const defaultStats: GameStats = {
   streak: 0,
   avgWaitTime: 0,
   day: 1,
+  money: 100,
+  tables: 2,
+  maxTables: 8,
+  unlockedItems: 3,
+  totalItems: 12,
+  upgrades: [],
+  menuItemsList: [],
+  stock: { coffeeBeans: 40, milk: 30 },
+  pendingDeliveries: 0,
+  fundsHistory: [{ time: 0, money: 100 }],
+  financials: {
+    totalIncome: 0, totalWages: 0, totalStockCost: 0,
+    totalUpgrades: 0, totalTableCost: 0, totalUnlockCost: 0,
+    dailyIncome: 0, dailyWages: 0, dailyExpenses: 0,
+  },
 };
 
 export default function Dashboard() {
