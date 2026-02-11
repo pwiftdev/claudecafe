@@ -116,7 +116,7 @@ GOAL: Maximize revenue+rating(1-5). Start $100+stock.
 
 RULES: Rating→customer flow (5★=busy,1★=dead). Out of stock→angry→rating drops. Deliveries take 60s. Day=90s real-time. Long waits→leave→rating drops.
 
-COSTS: Barista: no upfront cost, $14/min wage each(max 3)—more baristas=higher ongoing cost! Tables: 2 free, then $120,$160,$200,$250,$300,$350. Beans 40/$12. Milk 30/$6. Cakes: wholesale×batch.
+COSTS: Barista: no upfront cost, $7/hr wage each(max 3)—more baristas=higher ongoing cost! Tables: 2 free, then $120,$160,$200,$250,$300,$350. Beans 40/$12. Milk 30/$6. Cakes: wholesale×batch.
 Upgrades(5 levels each): Machine[$200,$350,$550,$800,$1200] Training[$150,$300,$500,$750,$1100] Ambiance[$100,$200,$400,$650,$950] Marketing[$120,$250,$400,$600,$900]
 
 RECIPES: Espresso=1bean Latte/Cappuccino/Mocha=1bean+1milk ColdBrew=2bean MatchaLatte=1milk Tiramisu(cake)=1bean
