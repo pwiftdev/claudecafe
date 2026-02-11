@@ -29,8 +29,12 @@ export const metadata: Metadata = {
   description:
     "Watch an AI autonomously run a cafe empire in real-time. Live gameplay, live thoughts, live stats.",
   icons: {
-    icon: "/cclogo.png",
+    icon: [
+      { url: "/cclogo.png", sizes: "any" },
+      { url: "/cclogo.png", type: "image/png" },
+    ],
     apple: "/cclogo.png",
+    shortcut: "/cclogo.png",
   },
 };
 
