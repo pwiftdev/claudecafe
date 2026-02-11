@@ -45,6 +45,8 @@ const defaultStats: GameStats = {
     totalUpgrades: 0, totalTableCost: 0, totalUnlockCost: 0,
     dailyIncome: 0, dailyWages: 0, dailyExpenses: 0,
   },
+  baristaWage: 7,
+  baristaMotivation: 1.0,
 };
 
 export default function Dashboard() {

@@ -12,20 +12,20 @@ interface HeaderProps {
 
 export default function Header({ stats, viewerCount = 0, connected = false }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between px-2 sm:px-4 py-1.5 sm:py-2 border-b-2 border-border-bright bg-card sticky top-0 z-50">
+    <header className="flex items-center justify-between px-2 sm:px-4 py-1.5 sm:py-2 border-b-2 border-border-bright bg-card sticky top-0 z-50 backdrop-blur-sm">
       <div className="flex items-center gap-2 sm:gap-3">
         <Image
           src="/cclogo.png"
           alt="ClaudeCafe Logo"
           width={32}
           height={32}
-          className="pixel-render w-8 h-8 sm:w-10 sm:h-10"
+          className="pixel-render w-8 h-8 sm:w-10 sm:h-10 animate-float"
         />
         <div className="flex items-center gap-1.5 sm:gap-2.5">
-          <h1 className="font-pixel text-xs sm:text-sm text-accent-light tracking-wide">
+          <h1 className="font-pixel text-xs sm:text-sm text-accent-light tracking-wide hover:text-accent transition-colors">
             ClaudeCafe
           </h1>
-          <span className="font-pixel text-[7px] sm:text-[8px] px-1.5 sm:px-2 py-0.5 sm:py-1 bg-accent/20 text-accent-light pixel-border-accent pixel-shadow-sm">
+          <span className="font-pixel text-[7px] sm:text-[8px] px-1.5 sm:px-2 py-0.5 sm:py-1 bg-accent/20 text-accent-light pixel-border-accent pixel-shadow-sm hover:bg-accent/30 transition-colors cursor-default">
             $CAFE
           </span>
         </div>
@@ -33,24 +33,24 @@ export default function Header({ stats, viewerCount = 0, connected = false }: He
 
       <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 px-2 sm:px-2.5 py-1 bg-live-pulse/15 border-2 border-live-pulse/40 pixel-shadow-sm">
+          <div className="flex items-center gap-1 px-2 sm:px-2.5 py-1 bg-live-pulse/15 border-2 border-live-pulse/40 pixel-shadow-sm glow-live">
             <div className="w-2 h-2 bg-live-pulse animate-blink" />
             <span className="font-pixel text-[7px] text-live-pulse">LIVE</span>
           </div>
         </div>
 
         <div className="hidden md:flex items-center gap-4 font-silk text-xs text-muted-light">
-          <div className="flex items-center gap-1.5">
-            <Zap className="w-3.5 h-3.5 text-accent" />
+          <div className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-default">
+            <Zap className="w-3.5 h-3.5 text-accent animate-pulse-glow" />
             <span>Day {stats.day}</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-default">
             <Users className="w-3.5 h-3.5 text-accent" />
             <span>{viewerCount.toLocaleString()} watching</span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 hover:text-success transition-colors cursor-default">
             <Globe className="w-3.5 h-3.5 text-accent" />
-            <span>${(stats.money ?? stats.revenue).toLocaleString()}</span>
+            <span className="font-bold">${(stats.money ?? stats.revenue).toLocaleString()}</span>
           </div>
         </div>
       </div>

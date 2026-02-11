@@ -235,9 +235,11 @@ export default function StatsBar({ stats }: StatsBarProps) {
       positive: true,
     },
     {
-      icon: <ShoppingBag className="w-3 h-3 sm:w-4 sm:h-4" />,
-      label: "Orders Today",
-      value: String(stats.ordersToday),
+      icon: <DollarSign className="w-3 h-3 sm:w-4 sm:h-4" />,
+      label: "Barista Wage",
+      value: `$${(stats.baristaWage ?? 7).toFixed(1)}/min`,
+      change: `${((stats.baristaMotivation ?? 1.0) * 100).toFixed(0)}%`,
+      positive: (stats.baristaMotivation ?? 1.0) >= 1.0,
     },
     {
       icon: <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />,

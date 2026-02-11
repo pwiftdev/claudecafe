@@ -53,6 +53,8 @@ export interface GameStats {
   pendingDeliveries: number;
   fundsHistory: FundsSnapshot[];
   financials: FinancialSummary;
+  baristaWage: number;
+  baristaMotivation: number;
 }
 
 export interface AIThought {

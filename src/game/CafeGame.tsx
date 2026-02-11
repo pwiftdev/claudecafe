@@ -8,8 +8,9 @@ import type { GameStats, AIThought } from "./types";
 // BROADCAST STATE TYPES (mirror backend types)
 // ═══════════════════════════════════════════════════════════════
 
-type BaristaState = "idle" | "going_to_counter" | "taking_order" | "going_to_machine" | "making" | "going_to_serve" | "serving";
-type CustomerState = "entering" | "queuing" | "at_counter" | "waiting_drink" | "going_to_table" | "sitting" | "leaving";
+type BaristaState = "idle" | "going_to_counter" | "taking_order" | "going_to_machine" | "making" | "going_to_serve" | "serving" | "going_to_table" | "taking_table_order" | "delivering_to_table" | "collecting_tip";
+type CustomerState = "entering" | "queuing" | "at_counter" | "waiting_drink" | "going_to_table" | "sitting" | "leaving" | "waiting_for_table_service" | "consuming";
+type ServiceType = "counter" | "table";
 
 interface BaristaEntity {
   id: number;
@@ -19,6 +20,7 @@ interface BaristaEntity {
   state: BaristaState;
   orderProgress: number;
   orderPrepTime: number;
+  carryingOrder: boolean;
 }
 
 interface CustomerEntity {
@@ -32,6 +34,9 @@ interface CustomerEntity {
   patienceTimer: number;
   maxPatience: number;
   bubbleVisible: boolean;
+  serviceType: ServiceType;
+  tableIndex: number;
+  tipAmount: number;
 }
 
 interface MoneyPopupEntity {
@@ -69,6 +74,11 @@ const CHAR_W = 0.55;
 const CHAR_H = 0.75;
 
 const COUNTER_Y = 10;
+
+// Animation constants
+const WALK_BOB_SPEED = 8; // Speed of walking animation
+const WALK_BOB_AMOUNT = 0.05; // Amount of vertical bobbing
+const POSITION_LERP = 0.15; // Smoothness of movement (0-1)
 
 const TABLE_POSITIONS = [
   { x: 3, y: 6 }, { x: 7, y: 6 }, { x: 12, y: 6 }, { x: 16, y: 6 },
@@ -108,22 +118,40 @@ function createCafeBackground(): THREE.CanvasTexture {
 
   const cy = (gy: number) => (GAME_H - 1 - gy) * T;
 
-  // ── FLOOR ──
+  // ── FLOOR with enhanced wood texture ──
   for (let gx = 0; gx < GAME_W; gx++) {
     for (let gy = 0; gy < GAME_H; gy++) {
       const isLight = (gx + gy) % 2 === 0;
-      px(ctx, gx * T, cy(gy), T, T, isLight ? "#3a2820" : "#321e16");
+      const baseColor = isLight ? "#3a2820" : "#321e16";
+      px(ctx, gx * T, cy(gy), T, T, baseColor);
+      
+      // Wood grain details
       px(ctx, gx * T + 3, cy(gy) + 3, 2, 2, isLight ? "#3e2c24" : "#2e1a14");
       px(ctx, gx * T + T - 5, cy(gy) + T - 5, 2, 2, isLight ? "#362418" : "#2a1812");
+      
+      // Add wood grain lines
+      if (Math.random() > 0.7) {
+        px(ctx, gx * T + Math.floor(Math.random() * T), cy(gy) + Math.floor(Math.random() * T), 1, 2, isLight ? "#2e1e14" : "#281a12");
+      }
+      
+      // Subtle shine on some tiles
+      if (isLight && Math.random() > 0.8) {
+        px(ctx, gx * T + 2, cy(gy) + 2, 1, 1, "#4a3428");
+      }
     }
   }
 
-  // ── WALLS ──
+  // ── WALLS with enhanced texture ──
   const drawWall = (gx: number, gy: number) => {
     const x = gx * T, y = cy(gy);
     px(ctx, x, y, T, T, "#1a1420");
+    
+    // Wall highlights and shadows
     px(ctx, x, y, T, 1, "#241828");
     px(ctx, x, y + 8, T, 1, "#241828");
+    px(ctx, x, y, 1, T, "#0e0a10"); // Left shadow
+    px(ctx, x + T - 1, y, 1, T, "#241830"); // Right highlight
+    
     if (gy % 2 === 0) {
       px(ctx, x + 8, y, 1, 8, "#241828");
       px(ctx, x, y + 8, 1, 8, "#241828");
@@ -131,8 +159,14 @@ function createCafeBackground(): THREE.CanvasTexture {
       px(ctx, x, y, 1, 8, "#241828");
       px(ctx, x + 8, y + 8, 1, 8, "#241828");
     }
+    
+    // Add subtle texture
+    if (Math.random() > 0.6) {
+      px(ctx, x + Math.floor(Math.random() * T), y + Math.floor(Math.random() * T), 1, 1, "#1e1628");
+    }
   };
 
+  // Draw walls
   for (let x = 0; x < GAME_W; x++) drawWall(x, GAME_H - 1);
   for (let x = 0; x < GAME_W; x++) {
     if (x === 18 || x === 17) continue;
@@ -143,6 +177,34 @@ function createCafeBackground(): THREE.CanvasTexture {
     if (y === 0 || y === 1) { drawWall(GAME_W - 1, y); continue; }
     drawWall(GAME_W - 1, y);
   }
+  
+  // ── WINDOWS on back wall ──
+  const drawWindow = (gx: number, gy: number) => {
+    const x = gx * T, y = cy(gy);
+    // Window frame
+    px(ctx, x, y, T * 2, T * 2, "#2a2438");
+    px(ctx, x + 1, y + 1, T * 2 - 2, T * 2 - 2, "#4a5870");
+    
+    // Window panes with sky reflection
+    const gradient = ctx.createLinearGradient(x + 2, y + 2, x + 2, y + T * 2 - 4);
+    gradient.addColorStop(0, "#6a8aa8");
+    gradient.addColorStop(1, "#4a6a88");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x + 2, y + 2, T - 3, T * 2 - 4);
+    ctx.fillRect(x + T + 1, y + 2, T - 3, T * 2 - 4);
+    
+    // Window cross bars
+    px(ctx, x + 1, y + T, T * 2 - 2, 2, "#2a2438");
+    px(ctx, x + T, y + 1, 2, T * 2 - 2, "#2a2438");
+    
+    // Window shine
+    px(ctx, x + 3, y + 3, 3, 3, "rgba(255, 255, 255, 0.3)");
+    px(ctx, x + T + 2, y + 3, 3, 3, "rgba(255, 255, 255, 0.2)");
+  };
+  
+  drawWindow(4, GAME_H - 1);
+  drawWindow(8, GAME_H - 1);
+  drawWindow(12, GAME_H - 1);
 
   // ── DOOR ──
   for (const dx of [17, 18]) {
@@ -163,25 +225,66 @@ function createCafeBackground(): THREE.CanvasTexture {
     }
   }
 
-  // ── COUNTER ──
+  // ── COUNTER with enhanced wood texture ──
   for (let gx = 1; gx < 15; gx++) {
     const x = gx * T, y = cy(COUNTER_Y);
     px(ctx, x, y, T, T, "#6b4226");
+    
+    // Top surface with shine
     px(ctx, x, y, T, 3, "#9b7050");
+    px(ctx, x + 2, y, T - 4, 1, "#ab8060"); // Shine highlight
     px(ctx, x, y + 3, T, 2, "#8b5e3c");
+    
+    // Wood grain
+    for (let i = 0; i < 3; i++) {
+      const grainX = x + Math.floor(Math.random() * T);
+      const grainY = y + 5 + Math.floor(Math.random() * 6);
+      px(ctx, grainX, grainY, 1, 2, "#5b3216");
+    }
+    
+    // Shadow at bottom
     px(ctx, x, y + T - 2, T, 2, "#4a2e18");
+    px(ctx, x, y + T - 3, T, 1, "#5a3e28"); // Gradient shadow
+    
+    // Side shadows
     if (gx === 1) px(ctx, x, y, 2, T, "#4a2e18");
     if (gx === 14) px(ctx, x + T - 2, y, 2, T, "#4a2e18");
+    
+    // Reflection on counter surface
+    if (Math.random() > 0.7) {
+      px(ctx, x + Math.floor(Math.random() * T), y + 1, 1, 1, "#ab8060");
+    }
   }
 
-  // ── COFFEE MACHINES ──
+  // ── COFFEE MACHINES with enhanced detail ──
   const drawMachine = (gx: number, gy: number) => {
     const x = gx * T, y = cy(gy);
+    
+    // Machine body with metallic look
     px(ctx, x + 2, y + 2, T - 4, T - 4, "#505568");
     px(ctx, x + 3, y + 3, T - 6, T - 6, "#606578");
+    px(ctx, x + 4, y + 4, T - 8, T - 8, "#707888");
+    
+    // Metallic highlights
+    px(ctx, x + 3, y + 3, 2, T - 6, "#707888"); // Left highlight
+    px(ctx, x + T - 5, y + 3, 1, T - 6, "#404550"); // Right shadow
+    px(ctx, x + 3, y + 3, T - 6, 2, "#808898"); // Top highlight
+    
+    // Power indicator light with glow
     px(ctx, x + 4, y + 2, 3, 2, "#e84040");
+    px(ctx, x + 5, y + 2, 1, 1, "#ff6060"); // Bright center
+    
+    // Dispenser
     px(ctx, x + 5, y + 8, 6, 4, "#404550");
     px(ctx, x + 6, y + 10, 4, 2, "#3a3a48");
+    px(ctx, x + 6, y + 9, 4, 1, "#505560"); // Dispenser highlight
+    
+    // Drip tray
+    px(ctx, x + 5, y + 12, 6, 2, "#2a2a38");
+    px(ctx, x + 6, y + 12, 4, 1, "#3a3a48"); // Tray edge
+    
+    // Steam/coffee drops (subtle detail)
+    px(ctx, x + 7, y + 11, 1, 1, "#8b6540");
   };
   drawMachine(3, 12);
   drawMachine(7, 12);
@@ -230,12 +333,29 @@ function createCafeBackground(): THREE.CanvasTexture {
     px(ctx, x + 3, y, T * 2 - 6, 2, "#d4a020");
   }
 
-  // ── HANGING LIGHTS ──
+  // ── HANGING LIGHTS with glow ──
   for (let gx = 3; gx < GAME_W - 3; gx += 4) {
     const x = gx * T + 6;
     const y = cy(GAME_H - 1) + T - 2;
+    
+    // Light glow (radial gradient effect)
+    const glowSize = 8;
+    for (let dy = -glowSize; dy <= glowSize; dy++) {
+      for (let dx = -glowSize; dx <= glowSize; dx++) {
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist <= glowSize) {
+          const alpha = Math.max(0, (1 - dist / glowSize) * 0.15);
+          ctx.fillStyle = `rgba(232, 192, 96, ${alpha})`;
+          ctx.fillRect(x + 2 + dx, y + 2 + dy, 1, 1);
+        }
+      }
+    }
+    
+    // Light fixture
+    px(ctx, x, y - 2, 4, 2, "#2a2a3a"); // Cord
     px(ctx, x, y, 4, 4, "#e8c060");
     px(ctx, x + 1, y + 1, 2, 2, "#f8e090");
+    px(ctx, x + 1, y, 2, 1, "#fffae0"); // Top shine
   }
 
   return makeTexture(canvas);
@@ -248,27 +368,82 @@ function createCharacterTexture(shirtColor: string, hairColor: string, isBarista
   c.height = H;
   const ctx = c.getContext("2d")!;
 
-  px(ctx, 2, 14, 8, 2, "rgba(0,0,0,0.3)");
+  // Enhanced shadow with gradient
+  px(ctx, 2, 14, 8, 2, "rgba(0,0,0,0.4)");
+  px(ctx, 3, 14, 6, 1, "rgba(0,0,0,0.2)");
+  
+  // Hair with highlights
   px(ctx, 3, 0, 6, 3, hairColor);
   px(ctx, 2, 1, 8, 2, hairColor);
+  px(ctx, 4, 0, 2, 1, lightenColor(hairColor, 30)); // Hair highlight
+  
+  // Face with better shading
   px(ctx, 3, 3, 6, 3, "#e0b888");
+  px(ctx, 3, 5, 6, 1, "#d4a878"); // Face shadow
+  
+  // Eyes with shine
   px(ctx, 4, 4, 1, 1, "#2a2a40");
   px(ctx, 7, 4, 1, 1, "#2a2a40");
+  px(ctx, 4, 4, 1, 1, "#1a1a28");
+  px(ctx, 7, 4, 1, 1, "#1a1a28");
+  // Eye shine
+  ctx.fillStyle = "rgba(255,255,255,0.6)";
+  ctx.fillRect(4, 3, 1, 1);
+  ctx.fillRect(7, 3, 1, 1);
+  
+  // Shirt with shading
   px(ctx, 2, 6, 8, 5, shirtColor);
+  px(ctx, 2, 10, 8, 1, darkenColor(shirtColor, 20)); // Shirt shadow
+  
   if (isBarista) {
+    // Apron with better detail
     px(ctx, 3, 7, 6, 4, "#f0e8d0");
-    px(ctx, 4, 7, 4, 1, "#d4a020");
+    px(ctx, 3, 10, 6, 1, "#d8d0b8"); // Apron shadow
+    px(ctx, 4, 7, 4, 1, "#d4a020"); // Apron tie
+    px(ctx, 5, 7, 2, 1, "#e8b830"); // Tie highlight
   }
+  
+  // Arms with shading
   px(ctx, 1, 7, 1, 3, shirtColor);
   px(ctx, 10, 7, 1, 3, shirtColor);
+  px(ctx, 1, 9, 1, 1, darkenColor(shirtColor, 25));
+  px(ctx, 10, 9, 1, 1, darkenColor(shirtColor, 25));
+  
+  // Hands
   px(ctx, 1, 10, 1, 1, "#e0b888");
   px(ctx, 10, 10, 1, 1, "#e0b888");
+  
+  // Legs with shading
   px(ctx, 3, 11, 3, 2, "#2a2a40");
   px(ctx, 7, 11, 3, 2, "#2a2a40");
+  px(ctx, 3, 12, 3, 1, "#1a1a28"); // Leg shadow
+  px(ctx, 7, 12, 3, 1, "#1a1a28");
+  
+  // Shoes
   px(ctx, 3, 13, 3, 1, "#1a1a28");
   px(ctx, 7, 13, 3, 1, "#1a1a28");
+  px(ctx, 3, 13, 1, 1, "#2a2a38"); // Shoe highlight
 
   return makeTexture(c);
+}
+
+// Helper functions for color manipulation
+function lightenColor(color: string, percent: number): string {
+  const num = parseInt(color.replace("#", ""), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.min(255, (num >> 16) + amt);
+  const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+  const B = Math.min(255, (num & 0x0000FF) + amt);
+  return "#" + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+}
+
+function darkenColor(color: string, percent: number): string {
+  const num = parseInt(color.replace("#", ""), 16);
+  const amt = Math.round(2.55 * percent);
+  const R = Math.max(0, (num >> 16) - amt);
+  const G = Math.max(0, ((num >> 8) & 0x00FF) - amt);
+  const B = Math.max(0, (num & 0x0000FF) - amt);
+  return "#" + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
 }
 
 function createMoneyTexture(amount: string): THREE.CanvasTexture {
@@ -276,10 +451,25 @@ function createMoneyTexture(amount: string): THREE.CanvasTexture {
   c.width = 64;
   c.height = 16;
   const ctx = c.getContext("2d")!;
+  
+  // Glow effect
+  ctx.shadowColor = "#40d870";
+  ctx.shadowBlur = 4;
+  
+  // Outline for better visibility
   ctx.font = "bold 12px monospace";
-  ctx.fillStyle = "#40d870";
+  ctx.strokeStyle = "#0a3020";
+  ctx.lineWidth = 3;
   ctx.textAlign = "center";
+  ctx.strokeText(`+$${amount}`, 32, 12);
+  
+  // Main text with gradient
+  const gradient = ctx.createLinearGradient(0, 0, 0, 16);
+  gradient.addColorStop(0, "#60f890");
+  gradient.addColorStop(1, "#40d870");
+  ctx.fillStyle = gradient;
   ctx.fillText(`+$${amount}`, 32, 12);
+  
   return makeTexture(c);
 }
 
@@ -288,8 +478,26 @@ function createProgressTexture(progress: number): THREE.CanvasTexture {
   c.width = 20;
   c.height = 4;
   const ctx = c.getContext("2d")!;
+  
+  // Background with border
   px(ctx, 0, 0, 20, 4, "#1a1a28");
-  px(ctx, 1, 1, Math.floor(18 * progress), 2, "#d4a020");
+  px(ctx, 0, 0, 20, 1, "#0a0a10"); // Top shadow
+  px(ctx, 0, 3, 20, 1, "#2a2a38"); // Bottom highlight
+  
+  // Progress bar with gradient
+  const barWidth = Math.floor(18 * progress);
+  if (barWidth > 0) {
+    const gradient = ctx.createLinearGradient(1, 0, 1, 4);
+    gradient.addColorStop(0, "#e8b830");
+    gradient.addColorStop(0.5, "#d4a020");
+    gradient.addColorStop(1, "#b88818");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(1, 1, barWidth, 2);
+    
+    // Shine on progress bar
+    px(ctx, 1, 1, Math.max(1, barWidth - 2), 1, "#f0d060");
+  }
+  
   return makeTexture(c);
 }
 
@@ -299,23 +507,41 @@ function createBubbleTexture(text: string, isCoffee: boolean): THREE.CanvasTextu
   c.height = 48;
   const ctx = c.getContext("2d")!;
 
-  ctx.fillStyle = "#fffef5";
+  // Soft shadow
+  ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+  ctx.shadowBlur = 4;
+  ctx.shadowOffsetX = 2;
+  ctx.shadowOffsetY = 2;
+
+  // Bubble with gradient
+  const gradient = ctx.createLinearGradient(2, 2, 2, 32);
+  gradient.addColorStop(0, "#fffef5");
+  gradient.addColorStop(1, "#f8f6e8");
+  ctx.fillStyle = gradient;
   ctx.beginPath();
   ctx.roundRect(2, 2, 124, 30, 8);
   ctx.fill();
+  
+  // Reset shadow for stroke
+  ctx.shadowColor = "transparent";
   ctx.strokeStyle = "#8a7a6a";
   ctx.lineWidth = 2;
   ctx.beginPath();
   ctx.roundRect(2, 2, 124, 30, 8);
   ctx.stroke();
 
-  ctx.fillStyle = "#fffef5";
+  // Pointer with shadow
+  ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+  ctx.shadowBlur = 3;
+  ctx.fillStyle = "#f8f6e8";
   ctx.beginPath();
   ctx.moveTo(54, 32);
   ctx.lineTo(64, 44);
   ctx.lineTo(74, 32);
   ctx.closePath();
   ctx.fill();
+  
+  ctx.shadowColor = "transparent";
   ctx.strokeStyle = "#8a7a6a";
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -323,19 +549,33 @@ function createBubbleTexture(text: string, isCoffee: boolean): THREE.CanvasTextu
   ctx.lineTo(64, 44);
   ctx.lineTo(74, 32);
   ctx.stroke();
-  ctx.fillStyle = "#fffef5";
+  ctx.fillStyle = "#f8f6e8";
   ctx.fillRect(56, 30, 16, 4);
 
-  ctx.fillStyle = isCoffee ? "#6b3a10" : "#d04880";
+  // Icon circle with gradient
+  const iconGradient = ctx.createRadialGradient(18, 17, 0, 18, 17, 8);
+  iconGradient.addColorStop(0, isCoffee ? "#8b5a20" : "#e068a0");
+  iconGradient.addColorStop(1, isCoffee ? "#6b3a10" : "#d04880");
+  ctx.fillStyle = iconGradient;
   ctx.beginPath();
   ctx.arc(18, 17, 8, 0, Math.PI * 2);
   ctx.fill();
+  
+  // Icon highlight
+  ctx.fillStyle = "rgba(255, 255, 255, 0.3)";
+  ctx.beginPath();
+  ctx.arc(16, 15, 3, 0, Math.PI * 2);
+  ctx.fill();
+  
   ctx.fillStyle = "#fff";
   ctx.font = "bold 10px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.fillText(isCoffee ? "☕" : "🍰", 18, 17);
 
+  // Text with subtle shadow
+  ctx.shadowColor = "rgba(0, 0, 0, 0.1)";
+  ctx.shadowBlur = 1;
   ctx.fillStyle = "#2a1a10";
   ctx.font = "bold 11px sans-serif";
   ctx.textAlign = "left";
@@ -353,15 +593,37 @@ function createTableTexture(): THREE.CanvasTexture {
   c.width = 48;
   c.height = 48;
   const ctx = c.getContext("2d")!;
+  
+  // Table legs with shadows
   const ch = "#4a3422";
   px(ctx, 4, 20, 8, 8, ch);
   px(ctx, 36, 20, 8, 8, ch);
   px(ctx, 20, 4, 8, 8, ch);
   px(ctx, 20, 36, 8, 8, ch);
+  
+  // Leg highlights
+  px(ctx, 5, 20, 2, 6, "#5a4432");
+  px(ctx, 37, 20, 2, 6, "#5a4432");
+  px(ctx, 21, 5, 2, 6, "#5a4432");
+  px(ctx, 21, 37, 2, 6, "#5a4432");
+  
+  // Table top with wood grain
   px(ctx, 10, 14, 28, 20, "#6b4a2e");
   px(ctx, 12, 12, 24, 24, "#7a5838");
   px(ctx, 14, 10, 20, 28, "#7a5838");
   px(ctx, 16, 16, 16, 16, "#8b6840");
+  
+  // Wood grain details
+  for (let i = 0; i < 8; i++) {
+    const x = 16 + Math.floor(Math.random() * 16);
+    const y = 16 + Math.floor(Math.random() * 16);
+    px(ctx, x, y, 1, 2, "#6b5030");
+  }
+  
+  // Table shine
+  px(ctx, 18, 14, 12, 2, "#9b7850");
+  px(ctx, 20, 16, 8, 1, "#ab8860");
+  
   return makeTexture(c);
 }
 
@@ -396,14 +658,31 @@ function createFlowerTexture(): THREE.CanvasTexture {
   c.width = 12;
   c.height = 16;
   const ctx = c.getContext("2d")!;
+  
+  // Vase with gradient
   px(ctx, 3, 10, 6, 6, "#6b8bb0");
   px(ctx, 4, 12, 4, 3, "#7ba0c0");
+  px(ctx, 4, 10, 2, 2, "#8bb0d0"); // Vase highlight
+  px(ctx, 7, 14, 1, 1, "#5a7a98"); // Vase shadow
+  
+  // Flowers with more detail
   px(ctx, 2, 2, 3, 3, "#e84060");
+  px(ctx, 2, 2, 1, 1, "#ff6080"); // Flower highlight
+  
   px(ctx, 5, 0, 3, 3, "#f0d060");
+  px(ctx, 6, 0, 1, 1, "#ffe080"); // Flower highlight
+  
   px(ctx, 7, 3, 3, 3, "#e060c0");
+  px(ctx, 8, 3, 1, 1, "#ff80d0"); // Flower highlight
+  
+  // Stems with shading
   px(ctx, 3, 5, 1, 5, "#40a040");
   px(ctx, 6, 3, 1, 7, "#40a040");
   px(ctx, 8, 5, 1, 5, "#40a040");
+  px(ctx, 3, 6, 1, 1, "#50b050"); // Stem highlight
+  px(ctx, 6, 4, 1, 1, "#50b050");
+  px(ctx, 8, 6, 1, 1, "#50b050");
+  
   return makeTexture(c);
 }
 
@@ -435,6 +714,35 @@ function createGoldTrimTexture(): THREE.CanvasTexture {
   return makeTexture(c);
 }
 
+function createTrayTexture(isCoffee: boolean): THREE.CanvasTexture {
+  const c = document.createElement("canvas");
+  c.width = 16;
+  c.height = 12;
+  const ctx = c.getContext("2d")!;
+  
+  // Tray
+  px(ctx, 2, 8, 12, 3, "#8b6540");
+  px(ctx, 3, 9, 10, 1, "#ab8560");
+  
+  // Cup or plate
+  if (isCoffee) {
+    // Coffee cup
+    px(ctx, 6, 4, 4, 4, "#6b4a2e");
+    px(ctx, 7, 5, 2, 2, "#4a3020");
+    px(ctx, 6, 4, 4, 1, "#8b6a4e");
+    // Steam
+    px(ctx, 7, 2, 1, 1, "rgba(255, 255, 255, 0.6)");
+    px(ctx, 8, 1, 1, 1, "rgba(255, 255, 255, 0.4)");
+  } else {
+    // Cake plate
+    px(ctx, 5, 5, 6, 3, "#e8e4d9");
+    px(ctx, 6, 3, 4, 2, "#d4a870");
+    px(ctx, 7, 2, 2, 1, "#ff6090");
+  }
+  
+  return makeTexture(c);
+}
+
 function createStockHudCanvas(): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D; tex: THREE.CanvasTexture } {
   const canvas = document.createElement("canvas");
   canvas.width = 640;
@@ -444,6 +752,105 @@ function createStockHudCanvas(): { canvas: HTMLCanvasElement; ctx: CanvasRenderi
   tex.magFilter = THREE.LinearFilter;
   tex.minFilter = THREE.LinearFilter;
   return { canvas, ctx, tex };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PARTICLE SYSTEM — for steam, sparkles, and effects
+// ═══════════════════════════════════════════════════════════════
+
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  maxLife: number;
+  size: number;
+  color: string;
+  type: "steam" | "sparkle" | "heart" | "star" | "dust";
+}
+
+class ParticleSystem {
+  particles: Particle[] = [];
+  
+  addSteam(x: number, y: number) {
+    for (let i = 0; i < 3; i++) {
+      this.particles.push({
+        x: x + (Math.random() - 0.5) * 0.2,
+        y: y,
+        vx: (Math.random() - 0.5) * 0.02,
+        vy: 0.02 + Math.random() * 0.01,
+        life: 1,
+        maxLife: 1,
+        size: 0.08 + Math.random() * 0.04,
+        color: "rgba(255, 255, 255, 0.4)",
+        type: "steam",
+      });
+    }
+  }
+  
+  addSparkle(x: number, y: number) {
+    for (let i = 0; i < 5; i++) {
+      const angle = (Math.PI * 2 * i) / 5;
+      this.particles.push({
+        x,
+        y,
+        vx: Math.cos(angle) * 0.05,
+        vy: Math.sin(angle) * 0.05,
+        life: 1,
+        maxLife: 1,
+        size: 0.06,
+        color: "#40d870",
+        type: "sparkle",
+      });
+    }
+  }
+  
+  addHeart(x: number, y: number) {
+    this.particles.push({
+      x,
+      y,
+      vx: 0,
+      vy: 0.03,
+      life: 1,
+      maxLife: 1,
+      size: 0.15,
+      color: "#ff6090",
+      type: "heart",
+    });
+  }
+  
+  addDust(x: number, y: number) {
+    this.particles.push({
+      x: x + (Math.random() - 0.5) * 0.1,
+      y: y,
+      vx: (Math.random() - 0.5) * 0.01,
+      vy: -0.01,
+      life: 1,
+      maxLife: 1,
+      size: 0.03,
+      color: "rgba(200, 180, 160, 0.3)",
+      type: "dust",
+    });
+  }
+  
+  update(deltaTime: number = 0.016) {
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= deltaTime;
+      
+      // Fade out
+      if (p.life <= 0) {
+        this.particles.splice(i, 1);
+      }
+    }
+  }
+  
+  clear() {
+    this.particles = [];
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -528,19 +935,33 @@ class CafeRenderer {
   scene: THREE.Scene;
   characterGroup: THREE.Group;
   uiGroup: THREE.Group;
+  particleGroup: THREE.Group;
   sound = new SoundManager();
+  particles = new ParticleSystem();
   needsRenderCallback: (() => void) | null = null;
 
   // Track meshes by entity ID
   baristaMeshes: Map<number, THREE.Mesh> = new Map();
+  baristaTrays: Map<number, THREE.Mesh> = new Map();
   customerMeshes: Map<number, { body: THREE.Mesh; bubble: THREE.Mesh | null; bubbleVisible: boolean }> = new Map();
   progressMeshes: Map<number, THREE.Mesh> = new Map();
   popupMeshes: Map<number, THREE.Mesh> = new Map();
+  particleMeshes: THREE.Mesh[] = [];
+  tipMeshes: Map<number, THREE.Mesh> = new Map();
   
   // Cache for progress textures to avoid recreation
   progressTextureCache: Map<number, THREE.CanvasTexture> = new Map();
   lastStockState: string = "";
   lastBaristaProgress: Map<number, number> = new Map();
+  
+  // Smooth movement tracking
+  baristaPositions: Map<number, { x: number; y: number; targetX: number; targetY: number; walkTime: number }> = new Map();
+  customerPositions: Map<number, { x: number; y: number; targetX: number; targetY: number; walkTime: number }> = new Map();
+  
+  // Particle effect timers
+  steamTimer: number = 0;
+  lastBaristaStates: Map<number, BaristaState> = new Map();
+  triggerCameraShake?: (intensity: number) => void;
 
   sharedGeo = new THREE.PlaneGeometry(CHAR_W, CHAR_H);
   progressGeo = new THREE.PlaneGeometry(0.6, 0.12);
@@ -563,8 +984,10 @@ class CafeRenderer {
     this.scene = scene;
     this.characterGroup = new THREE.Group();
     this.uiGroup = new THREE.Group();
+    this.particleGroup = new THREE.Group();
     scene.add(this.characterGroup);
     scene.add(this.uiGroup);
+    scene.add(this.particleGroup);
 
     // Create table sprites
     const tableTex = createTableTexture();
@@ -636,10 +1059,22 @@ class CafeRenderer {
     const H = this.stockHudCanvas.height;
     ctx.clearRect(0, 0, W, H);
 
-    ctx.fillStyle = "rgba(12, 12, 20, 0.85)";
+    // Background with gradient
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, H);
+    bgGradient.addColorStop(0, "rgba(20, 20, 30, 0.95)");
+    bgGradient.addColorStop(1, "rgba(12, 12, 20, 0.85)");
+    ctx.fillStyle = bgGradient;
     ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = "rgba(255, 200, 100, 0.12)";
-    ctx.fillRect(0, 0, W, 1);
+    
+    // Top glow line
+    const glowGradient = ctx.createLinearGradient(0, 0, W, 0);
+    glowGradient.addColorStop(0, "rgba(255, 200, 100, 0)");
+    glowGradient.addColorStop(0.5, "rgba(255, 200, 100, 0.2)");
+    glowGradient.addColorStop(1, "rgba(255, 200, 100, 0)");
+    ctx.fillStyle = glowGradient;
+    ctx.fillRect(0, 0, W, 2);
+    
+    // Bottom border
     ctx.fillStyle = "#4a3828";
     ctx.fillRect(0, H - 1, W, 1);
 
@@ -647,10 +1082,23 @@ class CafeRenderer {
 
     const drawItem = (label: string, value: number, warn: number, crit: number, dotColor: string) => {
       const c = value <= crit ? "#e84040" : value <= warn ? "#e8a020" : dotColor;
+      
+      // Glow effect for status dot
+      ctx.shadowColor = c;
+      ctx.shadowBlur = 8;
       ctx.fillStyle = c;
       ctx.beginPath();
       ctx.arc(x + 4, H / 2, 4, 0, Math.PI * 2);
       ctx.fill();
+      
+      // Inner bright dot
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = lightenColor(c, 30);
+      ctx.beginPath();
+      ctx.arc(x + 4, H / 2, 2, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.shadowColor = "transparent";
       x += 14;
 
       ctx.font = "bold 8px 'Courier New', monospace";
@@ -743,14 +1191,70 @@ class CafeRenderer {
     // Create or update baristas
     for (const b of state.baristas) {
       let mesh = this.baristaMeshes.get(b.id);
+      let posData = this.baristaPositions.get(b.id);
+      
       if (!mesh) {
         const tex = this.baristaTextures[b.slotIndex % this.baristaTextures.length];
         const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.1 });
         mesh = new THREE.Mesh(this.sharedGeo, mat);
         this.characterGroup.add(mesh);
         this.baristaMeshes.set(b.id, mesh);
+        posData = { x: b.x, y: b.y, targetX: b.x, targetY: b.y, walkTime: 0 };
+        this.baristaPositions.set(b.id, posData);
       }
-      mesh.position.set(b.x, b.y, 0.6 - b.y * 0.01);
+      
+      // Update target position
+      if (posData) {
+        posData.targetX = b.x;
+        posData.targetY = b.y;
+        
+        // Smooth interpolation
+        const dx = posData.targetX - posData.x;
+        const dy = posData.targetY - posData.y;
+        const isMoving = Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01;
+        
+        if (isMoving) {
+          posData.x += dx * POSITION_LERP;
+          posData.y += dy * POSITION_LERP;
+          posData.walkTime += 0.1;
+          this.needsRenderCallback?.(); // Keep rendering while moving
+        } else {
+          posData.x = posData.targetX;
+          posData.y = posData.targetY;
+        }
+        
+        // Walking animation bobbing
+        const walkBob = isMoving ? Math.sin(posData.walkTime * WALK_BOB_SPEED) * WALK_BOB_AMOUNT : 0;
+        mesh.position.set(posData.x, posData.y + walkBob, 0.6 - posData.y * 0.01);
+      } else {
+        mesh.position.set(b.x, b.y, 0.6 - b.y * 0.01);
+      }
+      
+      // Show tray when carrying order
+      if (b.carryingOrder) {
+        let trayMesh = this.baristaTrays.get(b.id);
+        if (!trayMesh) {
+          // Find customer to determine what's on the tray
+          const customer = state.customers.find(c => c.tableIndex >= 0);
+          const isCoffee = customer ? customer.orderType === "coffee" : true;
+          const trayTex = createTrayTexture(isCoffee);
+          const trayMat = new THREE.MeshBasicMaterial({ map: trayTex, transparent: true, alphaTest: 0.1 });
+          const trayGeo = new THREE.PlaneGeometry(0.3, 0.25);
+          trayMesh = new THREE.Mesh(trayGeo, trayMat);
+          this.uiGroup.add(trayMesh);
+          this.baristaTrays.set(b.id, trayMesh);
+        }
+        trayMesh.position.set(posData ? posData.x : b.x, (posData ? posData.y : b.y) + 0.35, 0.85);
+      } else {
+        const trayMesh = this.baristaTrays.get(b.id);
+        if (trayMesh) {
+          this.uiGroup.remove(trayMesh);
+          (trayMesh.material as THREE.MeshBasicMaterial).map?.dispose();
+          (trayMesh.material as THREE.MeshBasicMaterial).dispose();
+          trayMesh.geometry.dispose();
+          this.baristaTrays.delete(b.id);
+        }
+      }
 
       // Progress bar for making state
       if (b.state === "making" && b.orderPrepTime > 0) {
@@ -842,6 +1346,8 @@ class CafeRenderer {
     // Create or update customers
     for (const c of state.customers) {
       let entry = this.customerMeshes.get(c.id);
+      let posData = this.customerPositions.get(c.id);
+      
       if (!entry) {
         const texIndex = c.id % this.customerTextures.length;
         const tex = this.customerTextures[texIndex];
@@ -857,14 +1363,41 @@ class CafeRenderer {
 
         entry = { body, bubble, bubbleVisible: c.bubbleVisible };
         this.customerMeshes.set(c.id, entry);
+        posData = { x: c.x, y: c.y, targetX: c.x, targetY: c.y, walkTime: 0 };
+        this.customerPositions.set(c.id, posData);
       }
 
-      entry.body.position.set(c.x, c.y + c.bobOffset, 0.6 - c.y * 0.01);
+      // Update target position
+      if (posData) {
+        posData.targetX = c.x;
+        posData.targetY = c.y;
+        
+        // Smooth interpolation
+        const dx = posData.targetX - posData.x;
+        const dy = posData.targetY - posData.y;
+        const isMoving = Math.abs(dx) > 0.01 || Math.abs(dy) > 0.01;
+        
+        if (isMoving) {
+          posData.x += dx * POSITION_LERP;
+          posData.y += dy * POSITION_LERP;
+          posData.walkTime += 0.1;
+          this.needsRenderCallback?.(); // Keep rendering while moving
+        } else {
+          posData.x = posData.targetX;
+          posData.y = posData.targetY;
+        }
+        
+        // Walking animation bobbing
+        const walkBob = isMoving ? Math.sin(posData.walkTime * WALK_BOB_SPEED) * WALK_BOB_AMOUNT : 0;
+        entry.body.position.set(posData.x, posData.y + c.bobOffset + walkBob, 0.6 - posData.y * 0.01);
+      } else {
+        entry.body.position.set(c.x, c.y + c.bobOffset, 0.6 - c.y * 0.01);
+      }
 
       // Update bubble
-      if (entry.bubble) {
+      if (entry.bubble && posData) {
         entry.bubble.visible = c.bubbleVisible;
-        entry.bubble.position.set(c.x, c.y + 0.65, 0.85);
+        entry.bubble.position.set(posData.x, posData.y + 0.65, 0.85);
 
         // Flash bubble red when patience is low (needs continuous rendering)
         if (c.bubbleVisible && c.patienceTimer < 8) {
@@ -874,6 +1407,32 @@ class CafeRenderer {
         } else if (c.bubbleVisible) {
           (entry.bubble.material as THREE.MeshBasicMaterial).color.set(0xffffff);
         }
+      }
+      
+      // Show tip icon for customers who left tips
+      if (c.tipAmount > 0 && c.state === "leaving") {
+        let tipMesh = this.tipMeshes.get(c.id);
+        if (!tipMesh && c.tableIndex >= 0) {
+          const tipTex = createMoneyTexture(c.tipAmount.toFixed(1));
+          const tipMat = new THREE.MeshBasicMaterial({ map: tipTex, transparent: true });
+          tipMesh = new THREE.Mesh(this.popupGeo, tipMat);
+          tipMesh.position.set(posData ? posData.x : c.x, (posData ? posData.y : c.y) + 0.3, 0.9);
+          this.uiGroup.add(tipMesh);
+          this.tipMeshes.set(c.id, tipMesh);
+          
+          // Add tip to money
+          this.showMoneyPopup(posData ? posData.x : c.x, posData ? posData.y : c.y, c.tipAmount);
+        }
+      }
+    }
+    
+    // Clean up tip meshes for customers who left
+    for (const [id, mesh] of this.tipMeshes) {
+      if (!state.customers.find(c => c.id === id)) {
+        this.uiGroup.remove(mesh);
+        (mesh.material as THREE.MeshBasicMaterial).map?.dispose();
+        (mesh.material as THREE.MeshBasicMaterial).dispose();
+        this.tipMeshes.delete(id);
       }
     }
 
@@ -913,9 +1472,139 @@ class CafeRenderer {
       this.lastStockState = stockKey;
       this.updateStockHud(state);
     }
+    
+    // ── PARTICLE EFFECTS ──
+    this.steamTimer += 0.016;
+    
+    // Add steam from coffee machines when baristas are making coffee
+    for (const b of state.baristas) {
+      const lastState = this.lastBaristaStates.get(b.id);
+      
+      // Steam particles when making coffee
+      if (b.state === "making" && this.steamTimer > 0.1) {
+        this.particles.addSteam(b.x, b.y + 0.3);
+      }
+      
+      // Sparkles when completing an order
+      if (lastState === "making" && b.state !== "making") {
+        this.particles.addSparkle(b.x, b.y + 0.2);
+      }
+      
+      this.lastBaristaStates.set(b.id, b.state);
+    }
+    
+    if (this.steamTimer > 0.1) {
+      this.steamTimer = 0;
+    }
+    
+    // Add hearts for happy customers
+    for (const c of state.customers) {
+      if (c.state === "sitting" && Math.random() > 0.98) {
+        this.particles.addHeart(c.x, c.y + 0.3);
+      }
+    }
+    
+    // Update particles
+    this.particles.update();
+    this.renderParticles();
+    
+    // Keep rendering if particles exist
+    if (this.particles.particles.length > 0) {
+      this.needsRenderCallback?.();
+    }
+  }
+  
+  showMoneyPopup(x: number, y: number, amount: number) {
+    // This is handled by the backend's money popup system
+    // Just trigger a sparkle effect
+    this.particles.addSparkle(x, y + 0.2);
+  }
+
+  renderParticles() {
+    // Clear old particle meshes
+    for (const mesh of this.particleMeshes) {
+      this.particleGroup.remove(mesh);
+      (mesh.material as THREE.MeshBasicMaterial).dispose();
+      mesh.geometry.dispose();
+    }
+    this.particleMeshes = [];
+    
+    // Create new particle meshes
+    for (const p of this.particles.particles) {
+      const geo = new THREE.PlaneGeometry(p.size, p.size);
+      const canvas = document.createElement("canvas");
+      canvas.width = 8;
+      canvas.height = 8;
+      const ctx = canvas.getContext("2d")!;
+      
+      if (p.type === "steam") {
+        // Soft circle for steam
+        const gradient = ctx.createRadialGradient(4, 4, 0, 4, 4, 4);
+        gradient.addColorStop(0, "rgba(255, 255, 255, 0.4)");
+        gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 8, 8);
+      } else if (p.type === "sparkle") {
+        // Star shape for sparkles
+        ctx.fillStyle = p.color;
+        ctx.fillRect(3, 0, 2, 8);
+        ctx.fillRect(0, 3, 8, 2);
+      } else if (p.type === "heart") {
+        // Simple heart
+        ctx.fillStyle = p.color;
+        ctx.fillRect(1, 2, 2, 3);
+        ctx.fillRect(5, 2, 2, 3);
+        ctx.fillRect(2, 3, 4, 3);
+        ctx.fillRect(3, 5, 2, 2);
+      } else if (p.type === "dust") {
+        // Small dot for dust
+        ctx.fillStyle = p.color;
+        ctx.fillRect(3, 3, 2, 2);
+      }
+      
+      const tex = makeTexture(canvas);
+      const mat = new THREE.MeshBasicMaterial({
+        map: tex,
+        transparent: true,
+        opacity: p.life / p.maxLife,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(p.x, p.y, 0.95);
+      this.particleGroup.add(mesh);
+      this.particleMeshes.push(mesh);
+    }
   }
 
   dispose() {
+    // Clear particles
+    this.particles.clear();
+    for (const mesh of this.particleMeshes) {
+      this.particleGroup.remove(mesh);
+      (mesh.material as THREE.MeshBasicMaterial).map?.dispose();
+      (mesh.material as THREE.MeshBasicMaterial).dispose();
+      mesh.geometry.dispose();
+    }
+    this.particleMeshes = [];
+    
+    // Clean up barista trays
+    for (const [, mesh] of this.baristaTrays) {
+      this.uiGroup.remove(mesh);
+      (mesh.material as THREE.MeshBasicMaterial).map?.dispose();
+      (mesh.material as THREE.MeshBasicMaterial).dispose();
+      mesh.geometry.dispose();
+    }
+    this.baristaTrays.clear();
+    
+    // Clean up tip meshes
+    for (const [, mesh] of this.tipMeshes) {
+      this.uiGroup.remove(mesh);
+      (mesh.material as THREE.MeshBasicMaterial).map?.dispose();
+      (mesh.material as THREE.MeshBasicMaterial).dispose();
+    }
+    this.tipMeshes.clear();
+    
     for (const [, mesh] of this.baristaMeshes) {
       this.characterGroup.remove(mesh);
       (mesh.material as THREE.MeshBasicMaterial).dispose();
@@ -1049,10 +1738,18 @@ export default function CafeGame({ onStatsUpdate, onThoughtsUpdate, gameState, s
     threeRendererRef.current = threeRenderer;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0c0c14);
+    
+    // Enhanced background with subtle gradient
+    const bgColor = new THREE.Color(0x0c0c14);
+    scene.background = bgColor;
+    scene.fog = new THREE.Fog(0x0c0c14, 15, 25); // Subtle depth fog
 
     const camera = new THREE.OrthographicCamera(0, GAME_W, GAME_H, 0, 0.1, 100);
     camera.position.set(0, 0, 10);
+    
+    // Camera shake state
+    let cameraShake = 0;
+    let cameraShakeDecay = 0.9;
 
     // ── Background ──
     const bgTex = createCafeBackground();
@@ -1061,6 +1758,72 @@ export default function CafeGame({ onStatsUpdate, onThoughtsUpdate, gameState, s
     const bgMesh = new THREE.Mesh(bgGeo, bgMat);
     bgMesh.position.set(GAME_W / 2, GAME_H / 2, 0);
     scene.add(bgMesh);
+    
+    // ── Ambient lighting overlay ──
+    const createAmbientOverlay = (): THREE.CanvasTexture => {
+      const canvas = document.createElement("canvas");
+      canvas.width = GAME_W * T;
+      canvas.height = GAME_H * T;
+      const ctx = canvas.getContext("2d")!;
+      
+      // Warm ambient light from top
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, "rgba(255, 220, 140, 0.08)");
+      gradient.addColorStop(0.3, "rgba(255, 200, 100, 0.04)");
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0.1)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.magFilter = THREE.LinearFilter;
+      tex.minFilter = THREE.LinearFilter;
+      return tex;
+    };
+    
+    const ambientTex = createAmbientOverlay();
+    const ambientMat = new THREE.MeshBasicMaterial({
+      map: ambientTex,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    const ambientMesh = new THREE.Mesh(bgGeo, ambientMat);
+    ambientMesh.position.set(GAME_W / 2, GAME_H / 2, 0.01);
+    scene.add(ambientMesh);
+    
+    // ── Vignette effect ──
+    const createVignette = (): THREE.CanvasTexture => {
+      const canvas = document.createElement("canvas");
+      canvas.width = GAME_W * T;
+      canvas.height = GAME_H * T;
+      const ctx = canvas.getContext("2d")!;
+      
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const maxRadius = Math.max(canvas.width, canvas.height) * 0.7;
+      
+      const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, maxRadius);
+      gradient.addColorStop(0, "rgba(0, 0, 0, 0)");
+      gradient.addColorStop(0.6, "rgba(0, 0, 0, 0)");
+      gradient.addColorStop(1, "rgba(0, 0, 0, 0.4)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.magFilter = THREE.LinearFilter;
+      tex.minFilter = THREE.LinearFilter;
+      return tex;
+    };
+    
+    const vignetteTex = createVignette();
+    const vignetteMat = new THREE.MeshBasicMaterial({
+      map: vignetteTex,
+      transparent: true,
+      depthWrite: false,
+    });
+    const vignetteMesh = new THREE.Mesh(bgGeo, vignetteMat);
+    vignetteMesh.position.set(GAME_W / 2, GAME_H / 2, 6);
+    scene.add(vignetteMesh);
 
     // ── Renderer (for applying state) ──
     const cafeRenderer = new CafeRenderer(scene);
@@ -1107,11 +1870,25 @@ export default function CafeGame({ onStatsUpdate, onThoughtsUpdate, gameState, s
     resizeObs.observe(container);
     resize();
 
-    // ── Optimized Render Loop ──
+    // ── Optimized Render Loop with camera effects ──
     // Only render when state changes or for smooth animations (money popups, etc.)
     const animate = () => {
       const now = performance.now();
       const timeSinceLastRender = now - lastRenderTimeRef.current;
+      
+      // Apply camera shake
+      if (cameraShake > 0.001) {
+        const shakeX = (Math.random() - 0.5) * cameraShake;
+        const shakeY = (Math.random() - 0.5) * cameraShake;
+        camera.position.x = shakeX;
+        camera.position.y = shakeY;
+        cameraShake *= cameraShakeDecay;
+        needsRenderRef.current = true;
+      } else if (cameraShake > 0) {
+        camera.position.x = 0;
+        camera.position.y = 0;
+        cameraShake = 0;
+      }
       
       // Always render if we have pending state updates
       // Or render at least 30fps for smooth animations (money popups, progress bars)
@@ -1125,6 +1902,13 @@ export default function CafeGame({ onStatsUpdate, onThoughtsUpdate, gameState, s
       frameRef.current = requestAnimationFrame(animate);
     };
     frameRef.current = requestAnimationFrame(animate);
+    
+    // Expose camera shake function to renderer
+    if (cafeRenderer) {
+      (cafeRenderer as any).triggerCameraShake = (intensity: number = 0.1) => {
+        cameraShake = intensity;
+      };
+    }
 
     // ── Cleanup ──
     return () => {

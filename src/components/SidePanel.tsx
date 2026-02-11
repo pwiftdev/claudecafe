@@ -60,7 +60,7 @@ function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
           </div>
         </div>
         {currentThought ? (
-          <div className="p-2 sm:p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm">
+          <div className="p-2 sm:p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm glow-accent animate-scale-in">
             <p className="font-silk text-xs sm:text-sm text-foreground/90 leading-relaxed">
               {currentThought.text}
             </p>
@@ -68,14 +68,14 @@ function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
               <ThoughtTag type={currentThought.type} />
               <span className="font-pixel text-[5px] sm:text-[6px] text-muted">{currentThought.time}</span>
               {currentThought.cost !== undefined && (
-                <span className="font-pixel text-[5px] sm:text-[6px] text-accent-light ml-auto px-1 sm:px-1.5 py-0.5 bg-accent/10 border border-accent/20">
+                <span className="font-pixel text-[5px] sm:text-[6px] text-accent-light ml-auto px-1 sm:px-1.5 py-0.5 bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors">
                   ${currentThought.cost.toFixed(4)}
                 </span>
               )}
             </div>
           </div>
         ) : (
-          <div className="p-2 sm:p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm">
+          <div className="p-2 sm:p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm animate-pulse-glow">
             <p className="font-silk text-xs sm:text-sm text-muted-light">Initializing cafe strategy...</p>
           </div>
         )}
@@ -96,14 +96,14 @@ function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
         {historyThoughts.map((thought) => (
           <div
             key={thought.id}
-            className="p-2 sm:p-2.5 bg-chat-bg border-2 border-border hover:border-border-bright animate-slide-up"
+            className="p-2 sm:p-2.5 bg-chat-bg border-2 border-border hover:border-border-bright hover:bg-card-hover animate-slide-up transition-all cursor-pointer"
           >
-            <p className="font-silk text-xs sm:text-sm text-foreground/75 leading-relaxed">{thought.text}</p>
+            <p className="font-silk text-xs sm:text-sm text-foreground/75 leading-relaxed hover:text-foreground/90 transition-colors">{thought.text}</p>
             <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2 flex-wrap">
               <ThoughtTag type={thought.type} />
               <span className="font-pixel text-[5px] sm:text-[6px] text-muted">{thought.time}</span>
               {thought.cost !== undefined && (
-                <span className="font-pixel text-[5px] sm:text-[6px] text-accent-light ml-auto px-1 sm:px-1.5 py-0.5 bg-accent/10 border border-accent/20">
+                <span className="font-pixel text-[5px] sm:text-[6px] text-accent-light ml-auto px-1 sm:px-1.5 py-0.5 bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors">
                   ${thought.cost.toFixed(4)}
                 </span>
               )}
