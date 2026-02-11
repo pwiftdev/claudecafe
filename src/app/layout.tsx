@@ -28,6 +28,10 @@ export const metadata: Metadata = {
   title: "ClaudeCafe - $CAFE | AI Autonomous Cafe Tycoon",
   description:
     "Watch an AI autonomously run a cafe empire in real-time. Live gameplay, live thoughts, live stats.",
+  icons: {
+    icon: "/cclogo.png",
+    apple: "/cclogo.png",
+  },
 };
 
 export default function RootLayout({
