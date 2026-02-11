@@ -33,22 +33,22 @@ function StatCard({ icon, label, value, change, positive, onClick }: StatCardPro
   return (
     <div
       onClick={onClick}
-      className={`flex items-center gap-2.5 px-3 py-2.5 bg-card border-2 border-border-bright pixel-shadow-sm hover:border-accent/40 hover:bg-card-hover group ${onClick ? "cursor-pointer select-none" : ""}`}
+      className={`flex items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-1.5 sm:py-2.5 bg-card border-2 border-border-bright pixel-shadow-sm hover:border-accent/40 hover:bg-card-hover group ${onClick ? "cursor-pointer select-none" : ""}`}
     >
-      <div className="flex items-center justify-center w-8 h-8 bg-accent/10 border-2 border-accent/30 text-accent-light">
+      <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 bg-accent/10 border-2 border-accent/30 text-accent-light shrink-0">
         {icon}
       </div>
-      <div className="flex flex-col min-w-0">
-        <span className="font-pixel text-[6px] text-muted-light uppercase tracking-wider truncate leading-normal">
+      <div className="flex flex-col min-w-0 flex-1">
+        <span className="font-pixel text-[5px] sm:text-[6px] text-muted-light uppercase tracking-wider truncate leading-normal">
           {label}
         </span>
-        <div className="flex items-center gap-1.5">
-          <span className="font-silk text-base font-bold text-foreground">
+        <div className="flex items-center gap-1 sm:gap-1.5">
+          <span className="font-silk text-sm sm:text-base font-bold text-foreground truncate">
             {value}
           </span>
           {change && (
             <span
-              className={`font-pixel text-[6px] px-1.5 py-0.5 border ${
+              className={`font-pixel text-[5px] sm:text-[6px] px-1 sm:px-1.5 py-0.5 border shrink-0 ${
                 positive
                   ? "text-success bg-success/10 border-success/30"
                   : "text-live-pulse bg-live-pulse/10 border-live-pulse/30"
@@ -170,7 +170,7 @@ export default function StatsBar({ stats }: StatsBarProps) {
 
   const statCards: StatCardProps[] = [
     {
-      icon: <Wallet className="w-4 h-4" />,
+      icon: <Wallet className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Funds",
       value: `$${(stats.money ?? 0).toLocaleString()}`,
       change: (stats.money ?? 0) > 300 ? "HEALTHY" : "LOW",
@@ -178,49 +178,49 @@ export default function StatsBar({ stats }: StatsBarProps) {
       onClick: () => setShowFunds(!showFunds),
     },
     {
-      icon: <DollarSign className="w-4 h-4" />,
+      icon: <DollarSign className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Revenue",
       value: `$${stats.revenue.toLocaleString()}`,
       change: stats.revenue > 0 ? `+$${stats.revenue.toFixed(0)}` : undefined,
       positive: true,
     },
     {
-      icon: <Coffee className="w-4 h-4" />,
+      icon: <Coffee className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Coffee Sold",
       value: stats.coffeeSold.toLocaleString(),
       change: stats.coffeeSold > 0 ? `+${stats.coffeeSold}` : undefined,
       positive: true,
     },
     {
-      icon: <CakeSlice className="w-4 h-4" />,
+      icon: <CakeSlice className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Cakes Sold",
       value: stats.cakesSold.toLocaleString(),
       change: stats.cakesSold > 0 ? `+${stats.cakesSold}` : undefined,
       positive: true,
     },
     {
-      icon: <Star className="w-4 h-4" />,
+      icon: <Star className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Rating",
       value: stats.rating.toFixed(1),
       change: stats.rating >= 4.0 ? "GOOD" : "LOW",
       positive: stats.rating >= 4.0,
     },
     {
-      icon: <Users className="w-4 h-4" />,
+      icon: <Users className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Baristas",
       value: String(stats.baristasCount),
       change: stats.baristasCount > 1 ? `+${stats.baristasCount - 1}` : undefined,
       positive: true,
     },
     {
-      icon: <Armchair className="w-4 h-4" />,
+      icon: <Armchair className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Tables",
       value: `${stats.tables ?? 2}/${stats.maxTables ?? 8}`,
       change: (stats.tables ?? 2) >= 4 ? "EXPANDED" : undefined,
       positive: true,
     },
     {
-      icon: <BookOpen className="w-4 h-4" />,
+      icon: <BookOpen className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Menu",
       value: `${stats.unlockedItems ?? 3}/${stats.totalItems ?? 12}`,
       change: (stats.unlockedItems ?? 3) > 5 ? "DIVERSE" : undefined,
@@ -228,26 +228,26 @@ export default function StatsBar({ stats }: StatsBarProps) {
       onClick: () => setShowMenu(!showMenu),
     },
     {
-      icon: <Heart className="w-4 h-4" />,
+      icon: <Heart className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Customers",
       value: stats.customersServed.toLocaleString(),
       change: stats.customersServed > 0 ? `+${stats.customersServed}` : undefined,
       positive: true,
     },
     {
-      icon: <ShoppingBag className="w-4 h-4" />,
+      icon: <ShoppingBag className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Orders Today",
       value: String(stats.ordersToday),
     },
     {
-      icon: <TrendingUp className="w-4 h-4" />,
+      icon: <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Profit Margin",
       value: `${stats.profitMargin}%`,
       change: stats.profitMargin > 30 ? "HEALTHY" : undefined,
       positive: stats.profitMargin > 30,
     },
     {
-      icon: <Clock className="w-4 h-4" />,
+      icon: <Clock className="w-3 h-3 sm:w-4 sm:h-4" />,
       label: "Avg Wait",
       value: `${stats.avgWaitTime}s`,
       change: stats.avgWaitTime > 0 && stats.avgWaitTime < 10 ? "FAST" : stats.avgWaitTime >= 10 ? "SLOW" : undefined,
@@ -258,10 +258,10 @@ export default function StatsBar({ stats }: StatsBarProps) {
   const menuItems = stats.menuItemsList ?? [];
 
   return (
-    <div className="px-3 py-3 border-t-2 border-border-bright bg-card/60">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-3 h-3 bg-accent-light" />
-        <h2 className="font-pixel text-[8px] text-accent-light uppercase tracking-wider">
+      <div className="px-2 sm:px-3 py-2 sm:py-3 border-t-2 border-border-bright bg-card/60">
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
+        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-accent-light shrink-0" />
+        <h2 className="font-pixel text-[7px] sm:text-[8px] text-accent-light uppercase tracking-wider">
           Game Stats
         </h2>
         <div
@@ -276,7 +276,7 @@ export default function StatsBar({ stats }: StatsBarProps) {
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1.5 sm:gap-2">
         {statCards.map((stat, i) => (
           <StatCard key={i} {...stat} />
         ))}

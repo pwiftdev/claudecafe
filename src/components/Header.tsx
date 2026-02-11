@@ -12,20 +12,20 @@ interface HeaderProps {
 
 export default function Header({ stats, viewerCount = 0, connected = false }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between px-4 py-2 border-b-2 border-border-bright bg-card sticky top-0 z-50">
-      <div className="flex items-center gap-3">
+    <header className="flex items-center justify-between px-2 sm:px-4 py-1.5 sm:py-2 border-b-2 border-border-bright bg-card sticky top-0 z-50">
+      <div className="flex items-center gap-2 sm:gap-3">
         <Image
           src="/cclogo.png"
           alt="ClaudeCafe Logo"
-          width={40}
-          height={40}
-          className="pixel-render"
+          width={32}
+          height={32}
+          className="pixel-render w-8 h-8 sm:w-10 sm:h-10"
         />
-        <div className="flex items-center gap-2.5">
-          <h1 className="font-pixel text-sm text-accent-light tracking-wide">
+        <div className="flex items-center gap-1.5 sm:gap-2.5">
+          <h1 className="font-pixel text-xs sm:text-sm text-accent-light tracking-wide">
             ClaudeCafe
           </h1>
-          <span className="font-pixel text-[8px] px-2 py-1 bg-accent/20 text-accent-light pixel-border-accent pixel-shadow-sm">
+          <span className="font-pixel text-[7px] sm:text-[8px] px-1.5 sm:px-2 py-0.5 sm:py-1 bg-accent/20 text-accent-light pixel-border-accent pixel-shadow-sm">
             $CAFE
           </span>
         </div>

@@ -23,12 +23,12 @@ interface SidePanelProps {
 
 export default function SidePanel({ thoughts }: SidePanelProps) {
   return (
-    <div className="flex flex-col h-full border-l-2 border-border-bright bg-card">
+    <div className="flex flex-col h-full lg:border-l-2 border-border-bright bg-card">
       {/* Header */}
-      <div className="flex items-center justify-center gap-2 px-3 py-2.5 border-b-2 border-border-bright">
-        <Brain className="w-4 h-4 text-accent-light" />
-        <span className="font-silk text-sm text-accent-light">AI Thoughts</span>
-        <div className="w-2 h-2 bg-success animate-blink" />
+      <div className="flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 border-b-2 border-border-bright">
+        <Brain className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent-light shrink-0" />
+        <span className="font-silk text-xs sm:text-sm text-accent-light">AI Thoughts</span>
+        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-success animate-blink shrink-0" />
       </div>
 
       {/* Content */}
@@ -46,45 +46,45 @@ function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
   return (
     <>
       {/* Current thought */}
-      <div className="p-2.5 border-b-2 border-border-bright">
-        <div className="flex items-center gap-2 mb-2">
-          <div className="relative">
-            <Bot className="w-5 h-5 text-accent-light" />
-            <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-success animate-blink" />
+      <div className="p-2 sm:p-2.5 border-b-2 border-border-bright">
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+          <div className="relative shrink-0">
+            <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-accent-light" />
+            <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-success animate-blink" />
           </div>
-          <span className="font-pixel text-[7px] text-accent-light">CLAUDE IS THINKING</span>
-          <div className="flex gap-1 ml-1">
-            <div className="typing-dot w-1.5 h-1.5 bg-accent-light" />
-            <div className="typing-dot w-1.5 h-1.5 bg-accent-light" />
-            <div className="typing-dot w-1.5 h-1.5 bg-accent-light" />
+          <span className="font-pixel text-[6px] sm:text-[7px] text-accent-light">CLAUDE IS THINKING</span>
+          <div className="flex gap-0.5 sm:gap-1 ml-1">
+            <div className="typing-dot w-1 h-1 sm:w-1.5 sm:h-1.5 bg-accent-light" />
+            <div className="typing-dot w-1 h-1 sm:w-1.5 sm:h-1.5 bg-accent-light" />
+            <div className="typing-dot w-1 h-1 sm:w-1.5 sm:h-1.5 bg-accent-light" />
           </div>
         </div>
         {currentThought ? (
-          <div className="p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm">
-            <p className="font-silk text-sm text-foreground/90 leading-relaxed">
+          <div className="p-2 sm:p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm">
+            <p className="font-silk text-xs sm:text-sm text-foreground/90 leading-relaxed">
               {currentThought.text}
             </p>
-            <div className="flex items-center gap-2 mt-2.5">
+            <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-2.5 flex-wrap">
               <ThoughtTag type={currentThought.type} />
-              <span className="font-pixel text-[6px] text-muted">{currentThought.time}</span>
+              <span className="font-pixel text-[5px] sm:text-[6px] text-muted">{currentThought.time}</span>
               {currentThought.cost !== undefined && (
-                <span className="font-pixel text-[6px] text-accent-light ml-auto px-1.5 py-0.5 bg-accent/10 border border-accent/20">
+                <span className="font-pixel text-[5px] sm:text-[6px] text-accent-light ml-auto px-1 sm:px-1.5 py-0.5 bg-accent/10 border border-accent/20">
                   ${currentThought.cost.toFixed(4)}
                 </span>
               )}
             </div>
           </div>
         ) : (
-          <div className="p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm">
-            <p className="font-silk text-sm text-muted-light">Initializing cafe strategy...</p>
+          <div className="p-2 sm:p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm">
+            <p className="font-silk text-xs sm:text-sm text-muted-light">Initializing cafe strategy...</p>
           </div>
         )}
       </div>
 
       {/* History */}
-      <div className="flex-1 overflow-y-auto p-2.5 space-y-2">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="font-pixel text-[7px] text-muted uppercase tracking-wider">History</span>
+      <div className="flex-1 overflow-y-auto p-2 sm:p-2.5 space-y-1.5 sm:space-y-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+          <span className="font-pixel text-[6px] sm:text-[7px] text-muted uppercase tracking-wider">History</span>
           <div
             className="flex-1 h-0.5"
             style={{
@@ -96,14 +96,14 @@ function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
         {historyThoughts.map((thought) => (
           <div
             key={thought.id}
-            className="p-2.5 bg-chat-bg border-2 border-border hover:border-border-bright animate-slide-up"
+            className="p-2 sm:p-2.5 bg-chat-bg border-2 border-border hover:border-border-bright animate-slide-up"
           >
-            <p className="font-silk text-sm text-foreground/75 leading-relaxed">{thought.text}</p>
-            <div className="flex items-center gap-2 mt-2">
+            <p className="font-silk text-xs sm:text-sm text-foreground/75 leading-relaxed">{thought.text}</p>
+            <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2 flex-wrap">
               <ThoughtTag type={thought.type} />
-              <span className="font-pixel text-[6px] text-muted">{thought.time}</span>
+              <span className="font-pixel text-[5px] sm:text-[6px] text-muted">{thought.time}</span>
               {thought.cost !== undefined && (
-                <span className="font-pixel text-[6px] text-accent-light ml-auto px-1.5 py-0.5 bg-accent/10 border border-accent/20">
+                <span className="font-pixel text-[5px] sm:text-[6px] text-accent-light ml-auto px-1 sm:px-1.5 py-0.5 bg-accent/10 border border-accent/20">
                   ${thought.cost.toFixed(4)}
                 </span>
               )}
@@ -123,7 +123,7 @@ function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
 function ThoughtTag({ type }: { type: string }) {
   const colors = typeColors[type] || typeColors.observation;
   return (
-    <span className={`font-pixel text-[6px] px-2 py-0.5 border-2 ${colors.border} ${colors.bg} ${colors.text}`}>
+    <span className={`font-pixel text-[5px] sm:text-[6px] px-1.5 sm:px-2 py-0.5 border-2 ${colors.border} ${colors.bg} ${colors.text} shrink-0`}>
       {typeLabels[type] || type.toUpperCase()}
     </span>
   );

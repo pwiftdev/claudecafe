@@ -110,7 +110,8 @@ export default function Dashboard() {
     <div className="flex flex-col h-screen overflow-hidden bg-background">
       <Header stats={stats} viewerCount={viewerCount} connected={connected} />
 
-      <div className="flex flex-1 overflow-hidden">
+      {/* Desktop Layout */}
+      <div className="hidden lg:flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-1 overflow-hidden">
             <GameEmbed
@@ -124,8 +125,30 @@ export default function Dashboard() {
           <StatsBar stats={stats} />
         </div>
 
-        <div className="w-[380px] shrink-0 hidden lg:flex">
+        <div className="w-[380px] shrink-0">
           <SidePanel thoughts={thoughts} />
+        </div>
+      </div>
+
+      {/* Mobile Layout */}
+      <div className="lg:hidden flex flex-col flex-1 overflow-hidden">
+        {/* Game - takes 50vh */}
+        <div className="h-[50vh] shrink-0 overflow-hidden">
+          <GameEmbed
+            onStatsUpdate={handleStatsUpdate}
+            onThoughtsUpdate={handleThoughtsUpdate}
+            gameState={gameState}
+            soundEvents={soundEvents}
+            connected={connected}
+          />
+        </div>
+
+        {/* Stats and AI Thoughts below */}
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+          <StatsBar stats={stats} />
+          <div className="flex-1 min-h-0 border-t-2 border-border-bright">
+            <SidePanel thoughts={thoughts} />
+          </div>
         </div>
       </div>
     </div>
