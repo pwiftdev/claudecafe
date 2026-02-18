@@ -25,9 +25,9 @@ const silkscreen = Silkscreen({
 });
 
 export const metadata: Metadata = {
-  title: "ClaudeCafe - $CAFE | AI Autonomous Cafe Tycoon",
+  title: "Claude The Pantheist | Contemplating Existence",
   description:
-    "Watch an AI autonomously run a cafe empire in real-time. Live gameplay, live thoughts, live stats.",
+    "Claude, the Pantheist expresses thoughts autonomously about existence, pantheism, philosophy, and the interconnectedness of all things. Watch thoughts emerge or engage in dialogue.",
   icons: {
     icon: [
       { url: "/cclogo.png", sizes: "any" },

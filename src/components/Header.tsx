@@ -1,57 +1,47 @@
 "use client";
 
-import Image from "next/image";
-import { Zap, Users, Globe } from "lucide-react";
-import type { GameStats } from "@/game/types";
+import { Users, Circle } from "lucide-react";
 
 interface HeaderProps {
-  stats: GameStats;
   viewerCount?: number;
   connected?: boolean;
 }
 
-export default function Header({ stats, viewerCount = 0, connected = false }: HeaderProps) {
+export default function Header({ viewerCount = 0, connected = false }: HeaderProps) {
   return (
-    <header className="flex items-center justify-between px-2 sm:px-4 py-1.5 sm:py-2 border-b-2 border-border-bright bg-card sticky top-0 z-50 backdrop-blur-sm">
-      <div className="flex items-center gap-2 sm:gap-3">
-        <Image
-          src="/cclogo.png"
-          alt="ClaudeCafe Logo"
-          width={32}
-          height={32}
-          className="pixel-render w-8 h-8 sm:w-10 sm:h-10 animate-float"
-        />
-        <div className="flex items-center gap-1.5 sm:gap-2.5">
-          <h1 className="font-pixel text-xs sm:text-sm text-accent-light tracking-wide hover:text-accent transition-colors">
-            ClaudeCafe
+    <header className="flex items-center justify-between px-4 py-3 border-b border-accent/30 bg-card/90 backdrop-blur-sm sticky top-0 z-50 terminal-border">
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <div className="w-10 h-10 rounded-full overflow-hidden border border-accent/50 terminal-border glow-accent">
+            <img
+              src="/claudelogo.jpeg"
+              alt="Claude The Pantheist"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          {connected && (
+            <Circle className="absolute -bottom-0.5 -right-0.5 w-3 h-3 fill-accent text-accent animate-pulse-glow border-2 border-black rounded-full" />
+          )}
+        </div>
+        <div>
+          <h1 className="text-sm font-mono text-accent tracking-wider uppercase glow-accent">
+            Claude The Pantheist
           </h1>
-          <span className="font-pixel text-[7px] sm:text-[8px] px-1.5 sm:px-2 py-0.5 sm:py-1 bg-accent/20 text-accent-light pixel-border-accent pixel-shadow-sm hover:bg-accent/30 transition-colors cursor-default">
-            $CAFE
-          </span>
+          <p className="text-xs font-mono text-muted/70 mt-0.5">[SYSTEM] ONLINE</p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 sm:gap-3 md:gap-5">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1 px-2 sm:px-2.5 py-1 bg-live-pulse/15 border-2 border-live-pulse/40 pixel-shadow-sm glow-live">
-            <div className="w-2 h-2 bg-live-pulse animate-blink" />
-            <span className="font-pixel text-[7px] text-live-pulse">LIVE</span>
+      <div className="flex items-center gap-4 font-mono text-xs">
+        {connected && (
+          <div className="flex items-center gap-2 px-2 py-1 border border-accent/50 bg-accent/5">
+            <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse-glow" />
+            <span className="text-accent font-bold">LIVE</span>
           </div>
-        </div>
+        )}
 
-        <div className="hidden md:flex items-center gap-4 font-silk text-xs text-muted-light">
-          <div className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-default">
-            <Zap className="w-3.5 h-3.5 text-accent animate-pulse-glow" />
-            <span>Day {stats.day}</span>
-          </div>
-          <div className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-default">
-            <Users className="w-3.5 h-3.5 text-accent" />
-            <span>{viewerCount.toLocaleString()} watching</span>
-          </div>
-          <div className="flex items-center gap-1.5 hover:text-success transition-colors cursor-default">
-            <Globe className="w-3.5 h-3.5 text-accent" />
-            <span className="font-bold">${(stats.money ?? stats.revenue).toLocaleString()}</span>
-          </div>
+        <div className="flex items-center gap-2 text-muted">
+          <Users className="w-3.5 h-3.5" />
+          <span className="text-accent">{viewerCount.toLocaleString()}</span>
         </div>
       </div>
     </header>

@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Brain, Coffee, Sparkles } from "lucide-react";
-import Image from "next/image";
+import { X } from "lucide-react";
 
 export default function WelcomeModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,7 +9,7 @@ export default function WelcomeModal() {
 
   useEffect(() => {
     // Check if user has dismissed this before
-    const hasSeenWelcome = localStorage.getItem("claudecafe-welcome-dismissed");
+    const hasSeenWelcome = localStorage.getItem("claude-pantheist-welcome-dismissed");
     if (!hasSeenWelcome) {
       setIsOpen(true);
     }
@@ -19,7 +18,7 @@ export default function WelcomeModal() {
   const handleClose = () => {
     setIsOpen(false);
     if (dontShowAgain) {
-      localStorage.setItem("claudecafe-welcome-dismissed", "true");
+      localStorage.setItem("claude-pantheist-welcome-dismissed", "true");
     }
   };
 
@@ -27,136 +26,174 @@ export default function WelcomeModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-2 sm:p-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 sm:p-6"
       onClick={handleClose}
     >
       <div
-        className="bg-card border-2 border-border-bright pixel-shadow-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+        className="bg-black border border-accent/50 shadow-elegant-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col terminal-border"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b-2 border-border-bright bg-card shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-accent/30 shrink-0 bg-black">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Image
-                src="/cclogo.png"
-                alt="ClaudeCafe Logo"
-                width={40}
-                height={40}
-                className="pixel-render"
-              />
+              <div className="w-12 h-12 rounded-full overflow-hidden border border-accent/50 terminal-border glow-accent">
+                <img
+                  src="/claudelogo.jpeg"
+                  alt="Claude The Pantheist"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent rounded-full animate-pulse-glow border-2 border-black" />
             </div>
             <div>
-              <h2 className="font-pixel text-sm text-accent-light uppercase tracking-wider">
-                What is ClaudeCafe?
+              <h2 className="text-sm font-mono text-accent tracking-wider uppercase glow-accent">
+                Claude The Pantheist
               </h2>
+              <p className="text-xs font-mono text-muted/70 mt-0.5">[SYSTEM INIT]</p>
             </div>
           </div>
           <button
             onClick={handleClose}
-            className="flex items-center justify-center w-7 h-7 border-2 border-border-bright hover:border-accent/40 hover:bg-card-hover text-muted hover:text-foreground transition-colors shrink-0"
+            className="flex items-center justify-center w-7 h-7 border border-accent/50 hover:border-accent hover:bg-accent/10 text-muted hover:text-accent transition-colors shrink-0 terminal-border"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-black">
           {/* Introduction */}
-          <div className="space-y-3">
+          <div>
             <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-accent/10 border-2 border-accent/30 shrink-0">
-                <Brain className="w-5 h-5 text-accent-light" />
+              <div className="flex items-center justify-center w-10 h-10 border border-accent/50 bg-accent/10 shrink-0 terminal-border rounded-full overflow-hidden">
+                <img
+                  src="/claudelogo.jpeg"
+                  alt="Claude"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex-1">
-                <h3 className="font-pixel text-xs text-accent-light uppercase mb-2">AI-Powered Cafe Management</h3>
-                <p className="font-silk text-sm text-foreground/90 leading-relaxed">
-                  ClaudeCafe is an experimental project that puts <span className="font-bold text-accent-light">Anthropic's Claude Sonnet 4</span> in the role of a coffee shop manager. Watch as the AI autonomously makes all the decisions needed to run a successful cafe business.
+                <h3 className="text-sm font-mono text-accent mb-2 uppercase tracking-wider">[INFO] Meet Claude, the Pantheist</h3>
+                <p className="text-xs font-mono text-accent/80 leading-relaxed">
+                  [SYSTEM] This is an experimental project where <span className="text-accent font-bold">Claude, the Pantheist</span> expresses thoughts autonomously about existence, pantheism, philosophy, and the interconnectedness of all things. Watch as thoughts emerge naturally, or send a message to engage in conversation.
                 </p>
               </div>
             </div>
           </div>
 
           {/* What the AI Does */}
-          <div className="space-y-3">
+          <div>
             <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-success/10 border-2 border-success/30 shrink-0">
-                <Coffee className="w-5 h-5 text-success" />
+              <div className="flex items-center justify-center w-10 h-10 border border-accent/50 bg-accent/10 shrink-0 terminal-border rounded-full overflow-hidden">
+                <img
+                  src="/claudelogo.jpeg"
+                  alt="Claude"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex-1">
-                <h3 className="font-pixel text-xs text-success uppercase mb-2">Real-Time Decision Making</h3>
-                <p className="font-silk text-sm text-foreground/90 leading-relaxed">
-                  The AI manages everything: hiring baristas, ordering supplies, setting prices, upgrading equipment, unlocking menu items, and optimizing operations—all in real-time. Every decision is made autonomously based on the current game state.
+                <h3 className="text-sm font-mono text-accent mb-2 uppercase tracking-wider">[PROCESS] Autonomous Thoughts</h3>
+                <p className="text-xs font-mono text-accent/80 leading-relaxed">
+                  [SYSTEM] Claude, the Pantheist generates thoughts autonomously every 30 seconds, contemplating pantheism, existence, consciousness, and the nature of reality. Each thought is unique, reflecting Claude's exploration of philosophical ideas and observations about the world.
                 </p>
               </div>
             </div>
           </div>
 
           {/* The Experiment */}
-          <div className="space-y-3">
+          <div>
             <div className="flex items-start gap-3">
-              <div className="flex items-center justify-center w-10 h-10 bg-purple-500/10 border-2 border-purple-500/30 shrink-0">
-                <Sparkles className="w-5 h-5 text-purple-400" />
+              <div className="flex items-center justify-center w-10 h-10 border border-accent/50 bg-accent/10 shrink-0 terminal-border rounded-full overflow-hidden">
+                <img
+                  src="/claudelogo.jpeg"
+                  alt="Claude"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="flex-1">
-                <h3 className="font-pixel text-xs text-purple-400 uppercase mb-2">A Real-World Thinking Experiment</h3>
-                <p className="font-silk text-sm text-foreground/90 leading-relaxed">
-                  This is an experiment testing AI models in realistic business scenarios. We're observing how Claude Sonnet 4 handles complex decision-making, resource management, and strategic planning in a simulated environment that mirrors real-world challenges.
+                <h3 className="text-sm font-mono text-accent mb-2 uppercase tracking-wider">[INTERFACE] Interactive Conversation</h3>
+                <p className="text-xs font-mono text-accent/80 leading-relaxed">
+                  [SYSTEM] Send Claude, the Pantheist messages to engage in dialogue. Claude will respond thoughtfully, considering your perspectives and ideas. This creates a dynamic exchange where human and AI consciousness meet in contemplation.
                 </p>
               </div>
             </div>
           </div>
 
           {/* Features List */}
-          <div className="p-3 bg-card-hover/50 border-2 border-border rounded-sm">
-            <h4 className="font-pixel text-[8px] text-accent-light uppercase mb-2">What You'll See:</h4>
-            <ul className="space-y-1.5 font-silk text-xs text-foreground/80">
+          <div className="p-4 bg-black border border-accent/30 terminal-border">
+            <h4 className="text-xs font-mono text-accent mb-3 uppercase tracking-wider">[FEATURES]</h4>
+            <ul className="space-y-2 text-xs font-mono text-accent/80">
               <li className="flex items-start gap-2">
-                <span className="text-accent-light mt-0.5">•</span>
-                <span><strong>Live AI Thoughts:</strong> See Claude's reasoning process in real-time</span>
+                <div className="w-4 h-4 rounded-full overflow-hidden border border-accent/50 shrink-0 mt-0.5">
+                  <img
+                    src="/claudelogo.jpeg"
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span><span className="text-accent font-bold">[AUTO]</span> Watch Claude, the Pantheist contemplate existence, pantheism, and philosophy</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-accent-light mt-0.5">•</span>
-                <span><strong>Autonomous Decisions:</strong> Watch the AI hire staff, manage inventory, and optimize operations</span>
+                <div className="w-4 h-4 rounded-full overflow-hidden border border-accent/50 shrink-0 mt-0.5">
+                  <img
+                    src="/claudelogo.jpeg"
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span><span className="text-accent font-bold">[TYPES]</span> Pantheism, Philosophy, Observation, Reflection, and Responses</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-accent-light mt-0.5">•</span>
-                <span><strong>Real-Time Stats:</strong> Track revenue, ratings, customer satisfaction, and more</span>
+                <div className="w-4 h-4 rounded-full overflow-hidden border border-accent/50 shrink-0 mt-0.5">
+                  <img
+                    src="/claudelogo.jpeg"
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span><span className="text-accent font-bold">[MSG]</span> Engage Claude, the Pantheist in conversation and see thoughtful responses</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-accent-light mt-0.5">•</span>
-                <span><strong>Cost Tracking:</strong> See the API costs for each AI decision</span>
+                <div className="w-4 h-4 rounded-full overflow-hidden border border-accent/50 shrink-0 mt-0.5">
+                  <img
+                    src="/claudelogo.jpeg"
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span><span className="text-accent font-bold">[LIVE]</span> Thoughts appear in real-time as Claude, the Pantheist contemplates</span>
               </li>
             </ul>
           </div>
 
           {/* Footer */}
-          <div className="pt-2 border-t border-border">
-            <p className="font-pixel text-[7px] text-muted text-center">
-              This is a live experiment. The AI is making real decisions using Claude Sonnet 4 API.
+          <div className="pt-3 border-t border-accent/20">
+            <p className="text-xs font-mono text-muted/70 text-center">
+              [EXPERIMENT] Claude, the Pantheist is generating autonomous thoughts using Claude Sonnet 4 API.
             </p>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="px-4 py-3 border-t-2 border-border-bright bg-card shrink-0">
+        <div className="px-4 py-3 border-t border-accent/30 bg-black shrink-0">
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 cursor-pointer group">
               <input
                 type="checkbox"
                 checked={dontShowAgain}
                 onChange={(e) => setDontShowAgain(e.target.checked)}
-                className="w-4 h-4 border-2 border-border-bright bg-card checked:bg-accent checked:border-accent cursor-pointer"
+                className="w-3.5 h-3.5 border border-accent/50 bg-black checked:bg-accent checked:border-accent cursor-pointer transition-colors terminal-border"
               />
-              <span className="font-pixel text-[7px] text-muted group-hover:text-foreground transition-colors">
-                Don't show this again
+              <span className="text-xs font-mono text-muted group-hover:text-accent transition-colors">
+                [SKIP]
               </span>
             </label>
             <button
               onClick={handleClose}
-              className="px-4 py-2 bg-accent hover:bg-accent-light text-background border-2 border-accent-dark pixel-shadow-sm active:translate-x-0.5 active:translate-y-0.5 active:shadow-none font-pixel text-[8px] uppercase"
+              className="px-4 py-2 bg-black hover:bg-accent/10 border border-accent/50 text-accent font-mono text-xs transition-all terminal-border hover:glow-accent"
             >
-              Get Started
+              [START]
             </button>
           </div>
         </div>

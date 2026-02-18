@@ -1,134 +1,155 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-background: #0c0c14;
-  --color-foreground: #e8e4d9;
-  --color-card: #14141e;
-  --color-card-hover: #1c1c2a;
-  --color-border: #2a2a3a;
-  --color-border-bright: #3a3a4e;
-  --color-accent: #d4a020;
-  --color-accent-light: #f0c040;
-  --color-accent-glow: rgba(212, 160, 32, 0.12);
-  --color-accent-dark: #8a6810;
-  --color-success: #40d870;
-  --color-muted: #58586a;
-  --color-muted-light: #8888a0;
-  --color-chat-bg: #10101a;
-  --color-input-bg: #18182a;
-  --color-live-pulse: #e84040;
-  --color-pixel-shadow: #0a0a10;
-  --font-sans: var(--font-geist-sans);
+  /* Matrix/Terminal color palette */
+  --color-background: #000000;
+  --color-foreground: #00ff00;
+  --color-card: #0a0a0a;
+  --color-card-hover: #0f0f0f;
+  --color-border: #003300;
+  --color-border-bright: #00cc00;
+  --color-accent: #00ff00;
+  --color-accent-light: #33ff33;
+  --color-accent-glow: rgba(0, 255, 0, 0.2);
+  --color-accent-dark: #00cc00;
+  --color-success: #00ff00;
+  --color-muted: #00aa00;
+  --color-muted-light: #00cc00;
+  --color-chat-bg: #000000;
+  --color-input-bg: #0a0a0a;
+  --color-live-pulse: #00ff00;
+  --font-sans: var(--font-geist-mono);
   --font-mono: var(--font-geist-mono);
-  --font-pixel: var(--font-pixel);
-  --font-silk: var(--font-silk);
+  --font-serif: var(--font-geist-mono);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #2a2a3a transparent;
+  scrollbar-color: rgba(0, 255, 0, 0.3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 0, 0.3);
+  border: 1px solid rgba(0, 255, 0, 0.5);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 255, 0, 0.5);
 }
 
 body {
   background: var(--color-background);
   color: var(--color-foreground);
-  font-family: var(--font-silk), var(--font-sans), Arial, sans-serif;
-}
-
-/* Pixel-perfect rendering for images */
-.pixel-render {
+  font-family: var(--font-mono), 'Courier New', monospace;
+  font-feature-settings: "kern" 1;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: auto;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
 }
 
-/* Pixel box shadow (no blur, hard offset) */
-.pixel-shadow {
-  box-shadow: 3px 3px 0px var(--color-pixel-shadow);
-}
-
-.pixel-shadow-sm {
-  box-shadow: 2px 2px 0px var(--color-pixel-shadow);
-}
-
-.pixel-shadow-accent {
-  box-shadow: 3px 3px 0px var(--color-accent-dark);
-}
-
-/* Pixel border style */
-.pixel-border {
-  border: 2px solid var(--color-border-bright);
-}
-
-.pixel-border-accent {
-  border: 2px solid var(--color-accent);
-}
-
-/* CRT scanline overlay */
-.crt-scanlines {
-  background-image: repeating-linear-gradient(
+/* Terminal scanline effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
     0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.15) 2px,
-    rgba(0, 0, 0, 0.15) 4px
+    rgba(0, 255, 0, 0.03),
+    rgba(0, 255, 0, 0.03) 1px,
+    transparent 1px,
+    transparent 2px
   );
+  pointer-events: none;
+  z-index: 9999;
 }
 
-/* CRT screen glow */
-.crt-glow {
-  box-shadow:
-    inset 0 0 60px rgba(212, 160, 32, 0.03),
-    inset 0 0 20px rgba(0, 0, 0, 0.3);
+/* Terminal/monospace styling */
+.font-serif {
+  font-family: var(--font-mono), 'Courier New', monospace;
 }
 
-/* Enhanced glow effects */
+/* Terminal-style borders */
+.shadow-elegant {
+  box-shadow: 
+    0 0 0 1px var(--color-accent),
+    0 0 10px rgba(0, 255, 0, 0.3),
+    inset 0 0 10px rgba(0, 255, 0, 0.1);
+}
+
+.shadow-elegant-lg {
+  box-shadow: 
+    0 0 0 1px var(--color-accent),
+    0 0 20px rgba(0, 255, 0, 0.4),
+    inset 0 0 20px rgba(0, 255, 0, 0.15);
+}
+
+/* Terminal border style */
+.terminal-border {
+  border: 1px solid var(--color-accent);
+  box-shadow: 
+    0 0 5px rgba(0, 255, 0, 0.5),
+    inset 0 0 5px rgba(0, 255, 0, 0.1);
+}
+
+/* Matrix/terminal glow effects */
 .glow-accent {
   box-shadow: 
-    0 0 10px rgba(212, 160, 32, 0.3),
-    0 0 20px rgba(212, 160, 32, 0.15),
-    inset 0 0 10px rgba(212, 160, 32, 0.1);
+    0 0 10px rgba(0, 255, 0, 0.5),
+    0 0 20px rgba(0, 255, 0, 0.3),
+    0 0 30px rgba(0, 255, 0, 0.1),
+    inset 0 0 10px rgba(0, 255, 0, 0.2);
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
 }
 
 .glow-success {
   box-shadow: 
-    0 0 10px rgba(64, 216, 112, 0.3),
-    0 0 20px rgba(64, 216, 112, 0.15);
+    0 0 10px rgba(0, 255, 0, 0.5),
+    0 0 20px rgba(0, 255, 0, 0.3);
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
 }
 
 .glow-live {
   box-shadow: 
-    0 0 10px rgba(232, 64, 64, 0.4),
-    0 0 20px rgba(232, 64, 64, 0.2);
+    0 0 10px rgba(0, 255, 0, 0.6),
+    0 0 20px rgba(0, 255, 0, 0.4);
+  text-shadow: 0 0 8px rgba(0, 255, 0, 1);
 }
 
 @keyframes pulse-glow {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  50% { opacity: 0.5; }
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+@keyframes breathe {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes typing-dots {
-  0%, 80%, 100% { opacity: 0.2; }
+  0%, 80%, 100% { opacity: 0.3; }
   40% { opacity: 1; }
-}
-
-@keyframes marquee {
-  0% { transform: translateX(100%); }
-  100% { transform: translateX(-100%); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-4px); }
 }
 
 @keyframes shimmer {
@@ -137,56 +158,63 @@ body {
 }
 
 @keyframes scale-in {
-  from { transform: scale(0.95); opacity: 0; }
+  from { transform: scale(0.98); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 1.5s steps(2) infinite;
+  animation: pulse-glow 2s ease-in-out infinite;
 }
 
-.animate-blink {
-  animation: blink 1s steps(1) infinite;
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
 }
 
 .animate-slide-up {
-  animation: slide-up 0.15s steps(3);
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+  animation: slide-up 0.3s ease-out;
 }
 
 .animate-scale-in {
-  animation: scale-in 0.2s ease-out;
+  animation: scale-in 0.3s ease-out;
 }
 
-.typing-dot:nth-child(1) { animation: typing-dots 1.2s steps(3) infinite 0s; }
-.typing-dot:nth-child(2) { animation: typing-dots 1.2s steps(3) infinite 0.2s; }
-.typing-dot:nth-child(3) { animation: typing-dots 1.2s steps(3) infinite 0.4s; }
+.typing-dot:nth-child(1) { animation: typing-dots 1.4s ease-in-out infinite 0s; }
+.typing-dot:nth-child(2) { animation: typing-dots 1.4s ease-in-out infinite 0.2s; }
+.typing-dot:nth-child(3) { animation: typing-dots 1.4s ease-in-out infinite 0.4s; }
 
 /* Smooth transitions */
 * {
-  transition-property: color, background-color, border-color, opacity, transform;
-  transition-duration: 150ms;
+  transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+  transition-duration: 200ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Disable transitions for animations */
 .animate-pulse-glow,
-.animate-blink,
+.animate-breathe,
+.animate-fade-in,
 .animate-slide-up,
-.animate-float,
 .animate-scale-in,
 .typing-dot {
   transition: none;
 }
 
-/* Pixel font utility */
-.font-pixel {
-  font-family: var(--font-pixel), monospace;
+/* Terminal typography */
+.text-elegant {
+  font-family: var(--font-mono), 'Courier New', monospace;
+  font-feature-settings: "kern" 1;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+  text-shadow: 0 0 3px rgba(0, 255, 0, 0.5);
 }
 
-.font-silk {
-  font-family: var(--font-silk), monospace;
+/* Terminal prompt style */
+.terminal-prompt::before {
+  content: '> ';
+  color: var(--color-accent);
+  text-shadow: 0 0 5px rgba(0, 255, 0, 1);
 }

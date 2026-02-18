@@ -57,10 +57,27 @@ export interface GameStats {
   baristaMotivation: number;
 }
 
+export type ThoughtType = "philosophy" | "observation" | "reflection" | "response" | "pantheism";
+
 export interface AIThought {
   id: number;
   text: string;
   time: string;
-  type: "strategy" | "observation" | "decision" | "reflection";
+  type: ThoughtType;
   cost?: number; // Cost in USD for this AI thought
+}
+
+export interface UserMessage {
+  id: string;
+  userId: string;
+  text: string;
+  timestamp: number;
+  responded: boolean;
+}
+
+export interface BroadcastState {
+  thoughts: AIThought[];
+  recentMessages: UserMessage[];
+  viewerCount: number;
+  uptime: number; // Server uptime in seconds
 }

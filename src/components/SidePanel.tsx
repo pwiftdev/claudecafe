@@ -1,20 +1,48 @@
 "use client";
 
-import { Brain, Bot } from "lucide-react";
+import { Brain, Sparkles } from "lucide-react";
 import type { AIThought } from "@/game/types";
+import { cleanText } from "@/utils/textCleaner";
 
-const typeColors: Record<string, { border: string; bg: string; text: string }> = {
-  strategy: { border: "border-blue-400/50", bg: "bg-blue-400/10", text: "text-blue-400" },
-  observation: { border: "border-emerald-400/50", bg: "bg-emerald-400/10", text: "text-emerald-400" },
-  decision: { border: "border-amber-400/50", bg: "bg-amber-400/10", text: "text-amber-400" },
-  reflection: { border: "border-purple-400/50", bg: "bg-purple-400/10", text: "text-purple-400" },
+const typeColors: Record<string, { border: string; bg: string; text: string; icon: string }> = {
+  pantheism: { 
+    border: "border-green-500/50", 
+    bg: "bg-green-500/10", 
+    text: "text-green-400",
+    icon: "text-green-400"
+  },
+  philosophy: { 
+    border: "border-green-400/50", 
+    bg: "bg-green-400/10", 
+    text: "text-green-300",
+    icon: "text-green-300"
+  },
+  observation: { 
+    border: "border-green-600/50", 
+    bg: "bg-green-600/10", 
+    text: "text-green-500",
+    icon: "text-green-500"
+  },
+  reflection: { 
+    border: "border-green-700/50", 
+    bg: "bg-green-700/10", 
+    text: "text-green-600",
+    icon: "text-green-600"
+  },
+  response: { 
+    border: "border-green-300/50", 
+    bg: "bg-green-300/10", 
+    text: "text-green-200",
+    icon: "text-green-200"
+  },
 };
 
 const typeLabels: Record<string, string> = {
-  strategy: "STRATEGY",
-  observation: "OBSERVE",
-  decision: "DECISION",
-  reflection: "REFLECT",
+  pantheism: "Pantheism",
+  philosophy: "Philosophy",
+  observation: "Observation",
+  reflection: "Reflection",
+  response: "Response",
 };
 
 interface SidePanelProps {
@@ -23,12 +51,16 @@ interface SidePanelProps {
 
 export default function SidePanel({ thoughts }: SidePanelProps) {
   return (
-    <div className="flex flex-col h-full lg:border-l-2 border-border-bright bg-card">
+    <div className="flex flex-col h-full border-l border-accent/30 bg-card/90 backdrop-blur-sm terminal-border">
       {/* Header */}
-      <div className="flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-2 sm:py-2.5 border-b-2 border-border-bright">
-        <Brain className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent-light shrink-0" />
-        <span className="font-silk text-xs sm:text-sm text-accent-light">AI Thoughts</span>
-        <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-success animate-blink shrink-0" />
+      <div className="flex items-center justify-between px-4 py-3 border-b border-accent/30">
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Brain className="w-4 h-4 text-accent glow-accent" />
+            <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-accent rounded-full animate-pulse-glow" />
+          </div>
+          <span className="text-xs font-mono text-accent tracking-wider uppercase">[THOUGHTS]</span>
+        </div>
       </div>
 
       {/* Content */}
@@ -45,75 +77,76 @@ function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
 
   return (
     <>
-      {/* Current thought */}
-      <div className="p-2 sm:p-2.5 border-b-2 border-border-bright">
-        <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-          <div className="relative shrink-0">
-            <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-accent-light" />
-            <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-success animate-blink" />
-          </div>
-          <span className="font-pixel text-[6px] sm:text-[7px] text-accent-light">CLAUDE IS THINKING</span>
-          <div className="flex gap-0.5 sm:gap-1 ml-1">
-            <div className="typing-dot w-1 h-1 sm:w-1.5 sm:h-1.5 bg-accent-light" />
-            <div className="typing-dot w-1 h-1 sm:w-1.5 sm:h-1.5 bg-accent-light" />
-            <div className="typing-dot w-1 h-1 sm:w-1.5 sm:h-1.5 bg-accent-light" />
+      {/* Current thought - Featured */}
+      <div className="px-4 py-4 border-b border-accent/20 bg-black/50">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="w-3 h-3 text-accent glow-accent" />
+          <span className="text-xs font-mono text-accent/80 tracking-wider">[ACTIVE]</span>
+          <div className="flex gap-1 ml-auto">
+            <div className="typing-dot w-1 h-1 rounded-full bg-accent" />
+            <div className="typing-dot w-1 h-1 rounded-full bg-accent" />
+            <div className="typing-dot w-1 h-1 rounded-full bg-accent" />
           </div>
         </div>
         {currentThought ? (
-          <div className="p-2 sm:p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm glow-accent animate-scale-in">
-            <p className="font-silk text-xs sm:text-sm text-foreground/90 leading-relaxed">
-              {currentThought.text}
-            </p>
-            <div className="flex items-center gap-1.5 sm:gap-2 mt-2 sm:mt-2.5 flex-wrap">
+          <div className="animate-fade-in">
+            <div className="mb-3">
+              <p className="font-mono text-sm text-accent leading-relaxed whitespace-pre-wrap glow-accent">
+                {cleanText(currentThought.text)}
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-wrap font-mono text-xs">
               <ThoughtTag type={currentThought.type} />
-              <span className="font-pixel text-[5px] sm:text-[6px] text-muted">{currentThought.time}</span>
+              <span className="text-muted">[{currentThought.time}]</span>
               {currentThought.cost !== undefined && (
-                <span className="font-pixel text-[5px] sm:text-[6px] text-accent-light ml-auto px-1 sm:px-1.5 py-0.5 bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors">
+                <span className="text-muted/70 ml-auto">
                   ${currentThought.cost.toFixed(4)}
                 </span>
               )}
             </div>
           </div>
         ) : (
-          <div className="p-2 sm:p-3 bg-accent/8 border-2 border-accent/30 pixel-shadow-sm animate-pulse-glow">
-            <p className="font-silk text-xs sm:text-sm text-muted-light">Initializing cafe strategy...</p>
+          <div className="animate-pulse-glow">
+            <p className="font-mono text-sm text-muted/70">[WAITING FOR INPUT...]</p>
           </div>
         )}
       </div>
 
       {/* History */}
-      <div className="flex-1 overflow-y-auto p-2 sm:p-2.5 space-y-1.5 sm:space-y-2">
-        <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
-          <span className="font-pixel text-[6px] sm:text-[7px] text-muted uppercase tracking-wider">History</span>
-          <div
-            className="flex-1 h-0.5"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(90deg, var(--color-border-bright) 0px, var(--color-border-bright) 3px, transparent 3px, transparent 6px)",
-            }}
-          />
-        </div>
+      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 font-mono">
+        {historyThoughts.length > 0 && (
+          <div className="mb-3">
+            <span className="text-xs text-accent/60 tracking-wider">[LOG]</span>
+            <div className="mt-1 h-px bg-accent/20" />
+          </div>
+        )}
         {historyThoughts.map((thought) => (
           <div
             key={thought.id}
-            className="p-2 sm:p-2.5 bg-chat-bg border-2 border-border hover:border-border-bright hover:bg-card-hover animate-slide-up transition-all cursor-pointer"
+            className="group animate-slide-up"
           >
-            <p className="font-silk text-xs sm:text-sm text-foreground/75 leading-relaxed hover:text-foreground/90 transition-colors">{thought.text}</p>
-            <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2 flex-wrap">
-              <ThoughtTag type={thought.type} />
-              <span className="font-pixel text-[5px] sm:text-[6px] text-muted">{thought.time}</span>
-              {thought.cost !== undefined && (
-                <span className="font-pixel text-[5px] sm:text-[6px] text-accent-light ml-auto px-1 sm:px-1.5 py-0.5 bg-accent/10 border border-accent/20 hover:bg-accent/20 transition-colors">
-                  ${thought.cost.toFixed(4)}
-                </span>
-              )}
+            <div className="p-3 border border-accent/20 hover:border-accent/40 hover:bg-accent/5 transition-all cursor-pointer terminal-border">
+              <p className="font-mono text-xs text-accent/80 group-hover:text-accent leading-relaxed whitespace-pre-wrap mb-2">
+                {cleanText(thought.text)}
+              </p>
+              <div className="flex items-center gap-2 flex-wrap text-xs">
+                <ThoughtTag type={thought.type} />
+                <span className="text-muted/70">[{thought.time}]</span>
+                {thought.cost !== undefined && (
+                  <span className="text-muted/60 ml-auto">
+                    ${thought.cost.toFixed(4)}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         ))}
         {historyThoughts.length === 0 && (
-          <p className="font-silk text-xs text-muted text-center py-4">
-            Thoughts will appear as the AI plays...
-          </p>
+          <div className="text-center py-8">
+            <p className="text-xs text-muted/60 font-mono">
+              [NO ENTRIES]
+            </p>
+          </div>
         )}
       </div>
     </>
@@ -123,8 +156,8 @@ function ThoughtsPanel({ thoughts }: { thoughts: AIThought[] }) {
 function ThoughtTag({ type }: { type: string }) {
   const colors = typeColors[type] || typeColors.observation;
   return (
-    <span className={`font-pixel text-[5px] sm:text-[6px] px-1.5 sm:px-2 py-0.5 border-2 ${colors.border} ${colors.bg} ${colors.text} shrink-0`}>
-      {typeLabels[type] || type.toUpperCase()}
+    <span className={`text-xs px-2 py-0.5 border ${colors.border} ${colors.bg} ${colors.text} font-mono tracking-wider shrink-0`}>
+      [{typeLabels[type] || type}]
     </span>
   );
 }
