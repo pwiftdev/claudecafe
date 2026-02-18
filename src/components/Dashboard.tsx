@@ -58,18 +58,29 @@ export default function Dashboard() {
       setThoughts(newState.thoughts);
       setViewerCount(newState.viewerCount);
       
-      // Update queue status from state if we have unresponded messages
-      const unrespondedCount = newState.recentMessages.filter(m => !m.responded).length;
-      if (unrespondedCount > 0 && !queueStatus) {
-        // Estimate position (this is approximate)
-        setQueueStatus({
-          position: unrespondedCount,
-          totalQueued: unrespondedCount,
-          estimatedWaitSeconds: unrespondedCount * 10
-        });
-      } else if (unrespondedCount === 0 && queueStatus?.position === 0) {
-        // Clear queue status when queue is empty
-        setQueueStatus(null);
+      // Only update queue status if we have unresponded messages from THIS user
+      if (socketIdRef.current) {
+        const userUnrespondedMessages = newState.recentMessages.filter(
+          m => !m.responded && m.userId === socketIdRef.current
+        );
+        
+        if (userUnrespondedMessages.length > 0) {
+          // Count total unresponded messages to estimate position
+          const totalUnresponded = newState.recentMessages.filter(m => !m.responded).length;
+          // Find position of user's oldest unresponded message
+          const userOldestMessage = userUnrespondedMessages[userUnrespondedMessages.length - 1];
+          const allUnresponded = newState.recentMessages.filter(m => !m.responded);
+          const userPosition = allUnresponded.findIndex(m => m.id === userOldestMessage.id) + 1;
+          
+          setQueueStatus({
+            position: userPosition > 0 ? userPosition : totalUnresponded,
+            totalQueued: totalUnresponded,
+            estimatedWaitSeconds: totalUnresponded * 10
+          });
+        } else if (userUnrespondedMessages.length === 0 && queueStatus) {
+          // Clear queue status when user has no unresponded messages
+          setQueueStatus(null);
+        }
       }
     });
 
