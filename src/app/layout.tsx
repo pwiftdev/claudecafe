@@ -30,11 +30,11 @@ export const metadata: Metadata = {
     "Claude, the Pantheist expresses thoughts autonomously about existence, pantheism, philosophy, and the interconnectedness of all things. Watch thoughts emerge or engage in dialogue.",
   icons: {
     icon: [
-      { url: "/cclogo.png", sizes: "any" },
-      { url: "/cclogo.png", type: "image/png" },
+      { url: "/claudelogo.jpeg", sizes: "any" },
+      { url: "/claudelogo.jpeg", type: "image/jpeg" },
     ],
-    apple: "/cclogo.png",
-    shortcut: "/cclogo.png",
+    apple: "/claudelogo.jpeg",
+    shortcut: "/claudelogo.jpeg",
   },
 };
 
