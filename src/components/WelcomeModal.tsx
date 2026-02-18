@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
 export default function WelcomeModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     // Check if user has dismissed this before
@@ -13,12 +14,33 @@ export default function WelcomeModal() {
     if (!hasSeenWelcome) {
       setIsOpen(true);
     }
+
+    // Initialize audio element
+    audioRef.current = new Audio("/music.mp3");
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.5; // Set volume to 50%
+
+    // Cleanup audio on unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
   }, []);
 
   const handleClose = () => {
     setIsOpen(false);
     if (dontShowAgain) {
       localStorage.setItem("claude-pantheist-welcome-dismissed", "true");
+    }
+    // Start playing background music when user clicks [START]
+    if (audioRef.current) {
+      audioRef.current.play().catch((error) => {
+        console.error("[AUDIO] Failed to play music:", error);
+        // Some browsers require user interaction before playing audio
+        // This is expected behavior
+      });
     }
   };
 
