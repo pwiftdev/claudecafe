@@ -64,7 +64,8 @@ export interface AIThought {
   text: string;
   time: string;
   type: ThoughtType;
-  cost?: number; // Cost in USD for this AI thought
+  cost?: number;
+  replyTo?: string;
 }
 
 export interface UserMessage {

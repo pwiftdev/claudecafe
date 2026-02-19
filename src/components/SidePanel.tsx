@@ -1,6 +1,6 @@
 "use client";
 
-import { Zap, MessageSquare } from "lucide-react";
+import { Zap, MessageSquare, Reply } from "lucide-react";
 import type { AIThought } from "@/game/types";
 import { cleanText } from "@/utils/textCleaner";
 
@@ -44,6 +44,12 @@ export default function SidePanel({ thoughts }: SidePanelProps) {
         </div>
         {currentThought ? (
           <div className="animate-fade-in">
+            {currentThought.replyTo && (
+              <div className="flex items-center gap-1.5 mb-2">
+                <Reply className="w-3 h-3 text-accent/60" />
+                <span className="text-[11px] text-accent/70 font-medium">replying to anon#{currentThought.replyTo.slice(-4)}</span>
+              </div>
+            )}
             <p className="text-[13px] text-white/85 leading-relaxed mb-3">
               {cleanText(currentThought.text)}
             </p>
@@ -63,6 +69,12 @@ export default function SidePanel({ thoughts }: SidePanelProps) {
           {historyThoughts.map((thought) => (
             <div key={thought.id} className="group animate-slide-up">
               <div className="p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 hover:border-white/10 transition-all cursor-pointer">
+                {thought.replyTo && (
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <Reply className="w-2.5 h-2.5 text-accent/50" />
+                    <span className="text-[10px] text-accent/60 font-medium">replying to anon#{thought.replyTo.slice(-4)}</span>
+                  </div>
+                )}
                 <p className="text-[12px] text-white/60 group-hover:text-white/80 leading-relaxed mb-2.5">
                   {cleanText(thought.text)}
                 </p>
