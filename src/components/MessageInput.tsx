@@ -31,16 +31,16 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
       <div className="flex items-stretch gap-2">
         <div className="flex-1 relative">
           <div className="relative h-full">
-            <span className="absolute left-3 top-3 text-accent font-mono text-xs pointer-events-none">$</span>
+            <span className="absolute left-3 top-3 text-accent text-sm pointer-events-none">$</span>
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder={disabled ? "[CONNECTING...]" : "[INPUT] Share your thoughts..."}
+              placeholder={disabled ? "Connecting..." : "Share your thoughts..."}
               disabled={disabled}
               maxLength={500}
               rows={1}
-              className="w-full h-full pl-8 pr-16 py-3 bg-black border border-accent/50 rounded-none text-sm font-mono text-accent placeholder:text-muted/50 resize-none focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all disabled:opacity-50 disabled:cursor-not-allowed terminal-border"
+              className="w-full h-full pl-8 pr-16 py-3 bg-[#001a2e] border border-accent/50 rounded-xl text-sm text-accent placeholder:text-muted/50 resize-none focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed terminal-border"
               style={{
                 minHeight: "48px",
                 maxHeight: "120px",
@@ -52,8 +52,8 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
               }}
             />
             <div className="absolute bottom-2 right-2 flex items-center gap-2">
-              <span className="text-xs text-muted/60 font-mono">
-                [{text.length}/500]
+              <span className="text-xs text-muted/60">
+                {text.length}/500
               </span>
             </div>
           </div>
@@ -61,7 +61,7 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
         <button
           onClick={handleSend}
           disabled={disabled || !text.trim()}
-          className="px-4 py-3 bg-black hover:bg-accent/10 border border-accent/50 rounded-none text-accent font-mono text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 terminal-border hover:glow-accent disabled:hover:glow-accent self-stretch"
+          className="px-4 py-3 bg-[#001a2e] hover:bg-accent/10 border border-accent/50 rounded-xl text-accent text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 terminal-border hover:glow-accent disabled:hover:glow-accent self-stretch"
           style={{
             minHeight: "48px",
           }}

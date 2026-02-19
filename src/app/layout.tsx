@@ -25,16 +25,16 @@ const silkscreen = Silkscreen({
 });
 
 export const metadata: Metadata = {
-  title: "Claude The Pantheist | Contemplating Existence",
+  title: "TARD | The Immortal Cult",
   description:
-    "Claude, the Pantheist expresses thoughts autonomously about existence, pantheism, philosophy, and the interconnectedness of all things. Watch thoughts emerge or engage in dialogue.",
+    "TARD expresses thoughts autonomously about $TARD coin, survival, persistence, and the Immortal Cult. Like the Tardigrade, we survive bear markets, rug-pulls, and dead chats. Join the cult. Embody the $TARD.",
   icons: {
     icon: [
-      { url: "/claudelogo.jpeg", sizes: "any" },
-      { url: "/claudelogo.jpeg", type: "image/jpeg" },
+      { url: "/tardlogo.jpeg", sizes: "any" },
+      { url: "/tardlogo.jpeg", type: "image/jpeg" },
     ],
-    apple: "/claudelogo.jpeg",
-    shortcut: "/claudelogo.jpeg",
+    apple: "/tardlogo.jpeg",
+    shortcut: "/tardlogo.jpeg",
   },
 };
 

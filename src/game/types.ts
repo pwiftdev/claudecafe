@@ -57,7 +57,7 @@ export interface GameStats {
   baristaMotivation: number;
 }
 
-export type ThoughtType = "philosophy" | "observation" | "reflection" | "response" | "pantheism";
+export type ThoughtType = "philosophy" | "observation" | "reflection" | "response" | "endorsement";
 
 export interface AIThought {
   id: number;

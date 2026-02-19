@@ -115,7 +115,7 @@ export default function Dashboard() {
       // Check if this was our message
       if (sentMessagesRef.current.has(data.messageId)) {
         // Show notification
-        setResponseNotification("Claude has responded to your message!");
+        setResponseNotification("TARD has responded to your message!");
         // Clear notification after 5 seconds
         setTimeout(() => setResponseNotification(null), 5000);
         // Remove from sent messages
@@ -140,10 +140,11 @@ export default function Dashboard() {
   return (
     <>
       <WelcomeModal />
-      <div className="flex flex-col h-screen overflow-hidden bg-black relative">
-        {/* Matrix-style background effect */}
-        <div className="absolute inset-0 bg-gradient-to-b from-green-950/5 via-transparent to-black pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,255,0,0.03),transparent_70%)] pointer-events-none" />
+      <div className="flex flex-col h-screen overflow-hidden bg-[#001122] relative">
+        {/* Underwater background effect */}
+        <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/10 via-transparent to-[#001122] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,212,255,0.05),transparent_70%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(0,168,204,0.03),transparent_50%)] pointer-events-none" />
         
         <div className="relative z-10 flex flex-col h-full">
         <Header viewerCount={viewerCount} connected={connected} />
@@ -161,8 +162,12 @@ export default function Dashboard() {
                 muted
                 playsInline
                 className="absolute inset-0 w-full h-full object-cover z-0"
+                style={{
+                  imageRendering: 'pixelated',
+                  filter: 'contrast(1.2) brightness(0.9) saturate(1.1)',
+                }}
               >
-                <source src="/video.mp4" type="video/mp4" />
+                <source src="/tard.mp4" type="video/mp4" />
               </video>
               {/* Content Overlay */}
               <div className="max-w-3xl w-full relative z-10">
@@ -171,13 +176,13 @@ export default function Dashboard() {
                     <div className="inline-block mb-4">
                       <div className="w-12 h-12 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
                     </div>
-                    <p className="text-muted/70 font-mono text-xs">[CONNECTING TO SYSTEM...]</p>
+                    <p className="text-muted/70 text-sm">Connecting to system...</p>
                   </div>
                 ) : (
                   <div className="space-y-6">
                     {thoughts.length === 0 && (
                       <div className="text-center py-8">
-                        <p className="text-muted/60 font-mono text-xs">[WAITING FOR INPUT...]</p>
+                        <p className="text-muted/60 text-sm">Waiting for input...</p>
                       </div>
                     )}
                   </div>
@@ -186,11 +191,11 @@ export default function Dashboard() {
               {/* ASCII Text Animation - Positioned at bottom */}
               <div className="absolute bottom-0 left-0 right-0 w-full z-10">
                 <ASCIIText
-                  text="$PANTHEIST"
+                  text="$TARD"
                   enableWaves={true}
                   asciiFontSize={8}
                   textFontSize={180}
-                  textColor="#00ff00"
+                  textColor="#00d4ff"
                   planeBaseHeight={8}
                 />
               </div>
@@ -203,13 +208,13 @@ export default function Dashboard() {
           </div>
 
           {/* Message Input */}
-          <div className="border-t border-accent/30 p-4 bg-black/50">
+          <div className="border-t border-accent/30 p-4 bg-[#001122]/80">
             <div className="max-w-4xl mx-auto space-y-2">
               {/* Error Message */}
               {errorMessage && (
-                <div className="p-2 bg-black border border-accent/50 text-xs font-mono text-accent animate-fade-in terminal-border">
+                <div className="p-3 bg-[#001a2e] border border-accent/50 text-sm text-accent animate-fade-in terminal-border rounded-lg">
                   <div className="flex items-center gap-2">
-                    <span className="text-accent">[ERROR]</span>
+                    <span className="text-accent font-semibold">Error:</span>
                     <span>{errorMessage}</span>
                   </div>
                 </div>
@@ -217,10 +222,10 @@ export default function Dashboard() {
               
               {/* Response Notification */}
               {responseNotification && (
-                <div className="p-2 bg-black border border-accent/50 text-xs font-mono text-accent animate-fade-in terminal-border glow-accent">
+                <div className="p-3 bg-[#001a2e] border border-accent/50 text-sm text-accent animate-fade-in terminal-border glow-accent rounded-lg">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse-glow" />
-                    <span className="text-accent">[RESPONSE]</span>
+                    <span className="text-accent font-semibold">Response:</span>
                     <span>{responseNotification}</span>
                   </div>
                 </div>
@@ -228,16 +233,16 @@ export default function Dashboard() {
               
               {/* Queue Status */}
               {queueStatus && queueStatus.totalQueued > 0 && (
-                <div className="p-2 bg-black border border-accent/30 text-xs font-mono text-accent/80 animate-fade-in terminal-border">
+                <div className="p-3 bg-[#001a2e] border border-accent/30 text-sm text-accent/80 animate-fade-in terminal-border rounded-lg">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse-glow" />
                     <span>
                       {queueStatus.position > 0 ? (
-                        <>[QUEUE] Position {queueStatus.position}/{queueStatus.totalQueued}</>
+                        <>Queue Position {queueStatus.position}/{queueStatus.totalQueued}</>
                       ) : (
-                        <>[QUEUE] {queueStatus.totalQueued} message{queueStatus.totalQueued > 1 ? 's' : ''} pending</>
+                        <>{queueStatus.totalQueued} message{queueStatus.totalQueued > 1 ? 's' : ''} pending</>
                       )}
-                      {' | '}ETA: {Math.ceil(queueStatus.estimatedWaitSeconds / 60)}m
+                      {' • '}ETA: {Math.ceil(queueStatus.estimatedWaitSeconds / 60)}m
                     </span>
                   </div>
                 </div>

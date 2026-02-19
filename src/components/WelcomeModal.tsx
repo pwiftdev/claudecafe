@@ -10,7 +10,7 @@ export default function WelcomeModal() {
 
   useEffect(() => {
     // Check if user has dismissed this before
-    const hasSeenWelcome = localStorage.getItem("claude-pantheist-welcome-dismissed");
+    const hasSeenWelcome = localStorage.getItem("tard-welcome-dismissed");
     if (!hasSeenWelcome) {
       setIsOpen(true);
     }
@@ -32,7 +32,7 @@ export default function WelcomeModal() {
   const handleClose = () => {
     setIsOpen(false);
     if (dontShowAgain) {
-      localStorage.setItem("claude-pantheist-welcome-dismissed", "true");
+      localStorage.setItem("tard-welcome-dismissed", "true");
     }
     // Start playing background music when user clicks [START]
     if (audioRef.current) {
@@ -48,31 +48,31 @@ export default function WelcomeModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 sm:p-6"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-[#001122]/80 backdrop-blur-md p-4 sm:p-6"
       onClick={handleClose}
     >
       <div
-        className="bg-black border border-accent/50 shadow-elegant-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col terminal-border"
+        className="bg-[#001a2e] border border-accent/50 shadow-elegant-lg max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col terminal-border rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-accent/30 shrink-0 bg-black">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-accent/30 shrink-0 bg-[#001a2e]">
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="w-12 h-12 rounded-full overflow-hidden border border-accent/50 terminal-border glow-accent">
                 <img
-                  src="/claudelogo.jpeg"
-                  alt="Claude The Pantheist"
+                  src="/tardlogo.jpeg"
+                  alt="TARD"
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent rounded-full animate-pulse-glow border-2 border-black" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent rounded-full animate-pulse-glow border-2 border-[#001122]" />
             </div>
             <div>
-              <h2 className="text-sm font-mono text-accent tracking-wider uppercase glow-accent">
-                Claude The Pantheist
+              <h2 className="text-lg font-bold text-accent glow-accent">
+                TARD
               </h2>
-              <p className="text-xs font-mono text-muted/70 mt-0.5">[SYSTEM INIT]</p>
+              <p className="text-xs text-muted/70 mt-0.5">System Initializing</p>
             </div>
           </div>
           <button
@@ -84,21 +84,21 @@ export default function WelcomeModal() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-black">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-[#001a2e]">
           {/* Introduction */}
           <div>
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-10 h-10 border border-accent/50 bg-accent/10 shrink-0 terminal-border rounded-full overflow-hidden">
                 <img
-                  src="/claudelogo.jpeg"
-                  alt="Claude"
+                  src="/tardlogo.jpeg"
+                  alt="TARD"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-mono text-accent mb-2 uppercase tracking-wider">[INFO] Meet Claude, the Pantheist</h3>
-                <p className="text-xs font-mono text-accent/80 leading-relaxed">
-                  [SYSTEM] This is an experimental project where <span className="text-accent font-bold">Claude, the Pantheist</span> expresses thoughts autonomously about existence, pantheism, philosophy, and the interconnectedness of all things. Watch as thoughts emerge naturally, or send a message to engage in conversation.
+                <h3 className="text-base font-semibold text-accent mb-2">Meet TARD</h3>
+                <p className="text-sm text-accent/80 leading-relaxed">
+                  This is an experimental project where <span className="text-accent font-bold">TARD</span> expresses thoughts autonomously about $TARD coin, survival, persistence, and the Immortal Cult. Like the Tardigrade, we survive bear markets, rug-pulls, and dead chats. Watch as thoughts emerge naturally, or send a message to engage in conversation.
                 </p>
               </div>
             </div>
@@ -109,15 +109,15 @@ export default function WelcomeModal() {
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-10 h-10 border border-accent/50 bg-accent/10 shrink-0 terminal-border rounded-full overflow-hidden">
                 <img
-                  src="/claudelogo.jpeg"
-                  alt="Claude"
+                  src="/tardlogo.jpeg"
+                  alt="TARD"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-mono text-accent mb-2 uppercase tracking-wider">[PROCESS] Autonomous Thoughts</h3>
-                <p className="text-xs font-mono text-accent/80 leading-relaxed">
-                  [SYSTEM] Claude, the Pantheist generates thoughts autonomously every 30 seconds, contemplating pantheism, existence, consciousness, and the nature of reality. Each thought is unique, reflecting Claude's exploration of philosophical ideas and observations about the world.
+                <h3 className="text-base font-semibold text-accent mb-2">Autonomous Thoughts</h3>
+                <p className="text-sm text-accent/80 leading-relaxed">
+                  TARD generates thoughts autonomously every 30 seconds, endorsing $TARD coin, making predictions, and expressing unwavering conviction about the Immortal Cult. Each thought reflects TARD's ultra-convinced perspective on survival, persistence, and the Tardigrade philosophy.
                 </p>
               </div>
             </div>
@@ -128,94 +128,94 @@ export default function WelcomeModal() {
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-10 h-10 border border-accent/50 bg-accent/10 shrink-0 terminal-border rounded-full overflow-hidden">
                 <img
-                  src="/claudelogo.jpeg"
-                  alt="Claude"
+                  src="/tardlogo.jpeg"
+                  alt="TARD"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-mono text-accent mb-2 uppercase tracking-wider">[INTERFACE] Interactive Conversation</h3>
-                <p className="text-xs font-mono text-accent/80 leading-relaxed">
-                  [SYSTEM] Send Claude, the Pantheist messages to engage in dialogue. Claude will respond thoughtfully, considering your perspectives and ideas. This creates a dynamic exchange where human and AI consciousness meet in contemplation.
+                <h3 className="text-base font-semibold text-accent mb-2">Interactive Conversation</h3>
+                <p className="text-sm text-accent/80 leading-relaxed">
+                  Send TARD messages to engage in dialogue. TARD will respond with conviction about $TARD coin, the Immortal Cult, and survival. This creates a dynamic exchange where you can join the cult and embody the $TARD.
                 </p>
               </div>
             </div>
           </div>
 
           {/* Features List */}
-          <div className="p-4 bg-black border border-accent/30 terminal-border">
-            <h4 className="text-xs font-mono text-accent mb-3 uppercase tracking-wider">[FEATURES]</h4>
-            <ul className="space-y-2 text-xs font-mono text-accent/80">
+          <div className="p-4 bg-[#001a2e] border border-accent/30 terminal-border">
+            <h4 className="text-sm font-semibold text-accent mb-3">Features</h4>
+            <ul className="space-y-2 text-sm text-accent/80">
               <li className="flex items-start gap-2">
                 <div className="w-4 h-4 rounded-full overflow-hidden border border-accent/50 shrink-0 mt-0.5">
                   <img
-                    src="/claudelogo.jpeg"
+                    src="/tardlogo.jpeg"
                     alt=""
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span><span className="text-accent font-bold">[AUTO]</span> Watch Claude, the Pantheist contemplate existence, pantheism, and philosophy</span>
+                <span><span className="text-accent font-bold">Auto:</span> Watch TARD endorse $TARD coin, make predictions, and express cult-like conviction</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-4 h-4 rounded-full overflow-hidden border border-accent/50 shrink-0 mt-0.5">
                   <img
-                    src="/claudelogo.jpeg"
+                    src="/tardlogo.jpeg"
                     alt=""
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span><span className="text-accent font-bold">[TYPES]</span> Pantheism, Philosophy, Observation, Reflection, and Responses</span>
+                <span><span className="text-accent font-bold">Types:</span> Endorsement, Philosophy, Observation, Reflection, and Responses</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-4 h-4 rounded-full overflow-hidden border border-accent/50 shrink-0 mt-0.5">
                   <img
-                    src="/claudelogo.jpeg"
+                    src="/tardlogo.jpeg"
                     alt=""
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span><span className="text-accent font-bold">[MSG]</span> Engage Claude, the Pantheist in conversation and see thoughtful responses</span>
+                <span><span className="text-accent font-bold">Messages:</span> Engage TARD in conversation and see ultra-convinced responses about $TARD</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-4 h-4 rounded-full overflow-hidden border border-accent/50 shrink-0 mt-0.5">
                   <img
-                    src="/claudelogo.jpeg"
+                    src="/tardlogo.jpeg"
                     alt=""
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span><span className="text-accent font-bold">[LIVE]</span> Thoughts appear in real-time as Claude, the Pantheist contemplates</span>
+                <span><span className="text-accent font-bold">Live:</span> Thoughts appear in real-time as TARD persists and endorses</span>
               </li>
             </ul>
           </div>
 
           {/* Footer */}
           <div className="pt-3 border-t border-accent/20">
-            <p className="text-xs font-mono text-muted/70 text-center">
-              [EXPERIMENT] Claude, the Pantheist is generating autonomous thoughts using Claude Sonnet 4 API.
+            <p className="text-xs text-muted/70 text-center">
+              TARD is generating autonomous thoughts using Claude Sonnet 4 API. Join the Immortal Cult. Embody the $TARD.
             </p>
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="px-4 py-3 border-t border-accent/30 bg-black shrink-0">
+        <div className="px-4 py-3 border-t border-accent/30 bg-[#001a2e] shrink-0">
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 cursor-pointer group">
               <input
                 type="checkbox"
                 checked={dontShowAgain}
                 onChange={(e) => setDontShowAgain(e.target.checked)}
-                className="w-3.5 h-3.5 border border-accent/50 bg-black checked:bg-accent checked:border-accent cursor-pointer transition-colors terminal-border"
+                className="w-3.5 h-3.5 border border-accent/50 bg-[#001a2e] checked:bg-accent checked:border-accent cursor-pointer transition-colors terminal-border"
               />
-              <span className="text-xs font-mono text-muted group-hover:text-accent transition-colors">
-                [SKIP]
+              <span className="text-xs text-muted group-hover:text-accent transition-colors">
+                Skip
               </span>
             </label>
             <button
               onClick={handleClose}
-              className="px-4 py-2 bg-black hover:bg-accent/10 border border-accent/50 text-accent font-mono text-xs transition-all terminal-border hover:glow-accent"
+              className="px-4 py-2 bg-[#001a2e] hover:bg-accent/10 border border-accent/50 text-accent text-sm font-semibold transition-all terminal-border hover:glow-accent rounded-lg"
             >
-              [START]
+              Start
             </button>
           </div>
         </div>
