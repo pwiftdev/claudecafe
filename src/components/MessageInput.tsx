@@ -3,6 +3,8 @@
 import { useState, KeyboardEvent } from "react";
 import { Send, ArrowUp } from "lucide-react";
 
+const CYRILLIC_RE = /[\u0400-\u04FF]/;
+
 interface MessageInputProps {
   onSend: (text: string) => void;
   disabled?: boolean;
@@ -10,13 +12,20 @@ interface MessageInputProps {
 
 export default function MessageInput({ onSend, disabled = false }: MessageInputProps) {
   const [text, setText] = useState("");
+  const [blocked, setBlocked] = useState(false);
 
   const handleSend = () => {
     const trimmed = text.trim();
-    if (trimmed && !disabled) {
-      onSend(trimmed);
-      setText("");
+    if (!trimmed || disabled) return;
+
+    if (CYRILLIC_RE.test(trimmed)) {
+      setBlocked(true);
+      setTimeout(() => setBlocked(false), 2500);
+      return;
     }
+
+    onSend(trimmed);
+    setText("");
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -30,6 +39,11 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
 
   return (
     <div className="w-full">
+      {blocked && (
+        <div className="mb-2 px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-sm text-red-400 text-center animate-fade-in">
+          English only ser
+        </div>
+      )}
       <div className="relative flex items-center">
         <textarea
           value={text}
