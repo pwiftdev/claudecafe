@@ -7,7 +7,8 @@ import SidePanel from "./SidePanel";
 import MessageInput from "./MessageInput";
 import WelcomeModal from "./WelcomeModal";
 import BouncingLogos from "./BouncingLogos";
-import type { AIThought, BroadcastState } from "@/game/types";
+import ChatPanel from "./ChatPanel";
+import type { AIThought, BroadcastState, UserMessage } from "@/game/types";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
@@ -17,6 +18,7 @@ if (typeof window !== "undefined") {
 
 export default function Dashboard() {
   const [thoughts, setThoughts] = useState<AIThought[]>([]);
+  const [messages, setMessages] = useState<UserMessage[]>([]);
   const [state, setState] = useState<BroadcastState | null>(null);
   const [viewerCount, setViewerCount] = useState(0);
   const [connected, setConnected] = useState(false);
@@ -54,6 +56,7 @@ export default function Dashboard() {
     socket.on("state", (newState: BroadcastState) => {
       setState(newState);
       setThoughts(newState.thoughts);
+      setMessages(newState.recentMessages);
       setViewerCount(newState.viewerCount);
       
       if (socketIdRef.current) {
@@ -97,12 +100,17 @@ export default function Dashboard() {
     });
 
     socket.on("messageReceived", (message: { id: string; userId: string; text: string; timestamp: number; responded: boolean }) => {
+      setMessages(prev => {
+        if (prev.some(m => m.id === message.id)) return prev;
+        return [message, ...prev];
+      });
       if (socketIdRef.current && message.userId === socketIdRef.current) {
         sentMessagesRef.current.add(message.id);
       }
     });
 
     socket.on("messageResponded", (data: { messageId: string; response: AIThought }) => {
+      setMessages(prev => prev.map(m => m.id === data.messageId ? { ...m, responded: true } : m));
       if (sentMessagesRef.current.has(data.messageId)) {
         setResponseNotification("TARD has responded to your message!");
         setTimeout(() => setResponseNotification(null), 5000);
@@ -132,8 +140,13 @@ export default function Dashboard() {
           {/* Main Layout */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="flex-1 overflow-hidden flex gap-3 p-3">
-              {/* Left: Video panel */}
-              <div className="flex-1 lg:w-[calc(100%-440px)] relative overflow-hidden rounded-2xl border border-white/5 bg-black/40">
+              {/* Left: Chat panel */}
+              <div className="hidden lg:block w-[320px] shrink-0">
+                <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
+              </div>
+
+              {/* Center: Video panel */}
+              <div className="flex-1 relative overflow-hidden rounded-2xl border border-white/5 bg-black/40">
                 <video
                   autoPlay loop muted playsInline
                   className="absolute inset-0 w-full h-full object-cover"
@@ -176,7 +189,7 @@ export default function Dashboard() {
               </div>
 
               {/* Right: Thoughts */}
-              <div className="hidden lg:block w-[400px] shrink-0">
+              <div className="hidden lg:block w-[320px] shrink-0">
                 <SidePanel thoughts={thoughts} />
               </div>
             </div>
@@ -216,9 +229,14 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Mobile sidebar */}
-          <div className="lg:hidden border-t border-white/5 h-[50vh] shrink-0">
-            <SidePanel thoughts={thoughts} />
+          {/* Mobile panels */}
+          <div className="lg:hidden border-t border-white/5 h-[50vh] shrink-0 flex">
+            <div className="w-1/2 border-r border-white/5">
+              <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
+            </div>
+            <div className="w-1/2">
+              <SidePanel thoughts={thoughts} />
+            </div>
           </div>
         </div>
       </div>
