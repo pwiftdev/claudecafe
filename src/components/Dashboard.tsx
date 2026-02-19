@@ -6,12 +6,10 @@ import Header from "./Header";
 import SidePanel from "./SidePanel";
 import MessageInput from "./MessageInput";
 import WelcomeModal from "./WelcomeModal";
-import ASCIIText from "./ASCIIText";
 import type { AIThought, BroadcastState } from "@/game/types";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
-// Debug: Log the backend URL being used
 if (typeof window !== "undefined") {
   console.log("[Dashboard] Backend URL:", BACKEND_URL);
 }
@@ -28,7 +26,6 @@ export default function Dashboard() {
   const sentMessagesRef = useRef<Set<string>>(new Set());
   const socketIdRef = useRef<string | null>(null);
 
-  // WebSocket connection
   useEffect(() => {
     const socket = io(BACKEND_URL, {
       transports: ["websocket", "polling"],
@@ -58,16 +55,13 @@ export default function Dashboard() {
       setThoughts(newState.thoughts);
       setViewerCount(newState.viewerCount);
       
-      // Only update queue status if we have unresponded messages from THIS user
       if (socketIdRef.current) {
         const userUnrespondedMessages = newState.recentMessages.filter(
           m => !m.responded && m.userId === socketIdRef.current
         );
         
         if (userUnrespondedMessages.length > 0) {
-          // Count total unresponded messages to estimate position
           const totalUnresponded = newState.recentMessages.filter(m => !m.responded).length;
-          // Find position of user's oldest unresponded message
           const userOldestMessage = userUnrespondedMessages[userUnrespondedMessages.length - 1];
           const allUnresponded = newState.recentMessages.filter(m => !m.responded);
           const userPosition = allUnresponded.findIndex(m => m.id === userOldestMessage.id) + 1;
@@ -78,7 +72,6 @@ export default function Dashboard() {
             estimatedWaitSeconds: totalUnresponded * 10
           });
         } else if (userUnrespondedMessages.length === 0 && queueStatus) {
-          // Clear queue status when user has no unresponded messages
           setQueueStatus(null);
         }
       }
@@ -95,32 +88,24 @@ export default function Dashboard() {
     socket.on("error", (error: { message: string }) => {
       console.error("[WS] Error:", error.message);
       setErrorMessage(error.message);
-      // Auto-clear error after 5 seconds
       setTimeout(() => setErrorMessage(null), 5000);
     });
 
     socket.on("queueStatus", (status: { position: number; totalQueued: number; estimatedWaitSeconds: number }) => {
       setQueueStatus(status);
-      // Keep queue status visible, don't auto-clear
     });
 
     socket.on("messageReceived", (message: { id: string; userId: string; text: string; timestamp: number; responded: boolean }) => {
-      // Track messages sent by this user (check if userId matches socket.id)
       if (socketIdRef.current && message.userId === socketIdRef.current) {
         sentMessagesRef.current.add(message.id);
       }
     });
 
     socket.on("messageResponded", (data: { messageId: string; response: AIThought }) => {
-      // Check if this was our message
       if (sentMessagesRef.current.has(data.messageId)) {
-        // Show notification
         setResponseNotification("TARD has responded to your message!");
-        // Clear notification after 5 seconds
         setTimeout(() => setResponseNotification(null), 5000);
-        // Remove from sent messages
         sentMessagesRef.current.delete(data.messageId);
-        // Clear queue status since we got a response
         setQueueStatus(null);
       }
     });
@@ -133,130 +118,104 @@ export default function Dashboard() {
   const sendMessage = (text: string) => {
     if (socketRef.current && connected) {
       socketRef.current.emit("sendMessage", text);
-      // Note: We'll track the message ID when messageReceived event fires
     }
   };
 
   return (
     <>
       <WelcomeModal />
-      <div className="flex flex-col h-screen overflow-hidden bg-[#001122] relative">
-        {/* Underwater background effect */}
-        <div className="absolute inset-0 bg-gradient-to-b from-cyan-950/10 via-transparent to-[#001122] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,212,255,0.05),transparent_70%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(0,168,204,0.03),transparent_50%)] pointer-events-none" />
-        
+      <div className="flex flex-col h-screen overflow-hidden bg-background relative">
         <div className="relative z-10 flex flex-col h-full">
-        <Header viewerCount={viewerCount} connected={connected} />
+          <Header viewerCount={viewerCount} connected={connected} />
 
-        {/* Main Layout */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Main Content Area */}
-          <div className="flex-1 overflow-hidden flex">
-            {/* Left: Main Contemplation Area */}
-            <div className="flex-1 lg:w-[calc(100%-420px)] flex items-center justify-center p-8 lg:p-12 relative overflow-hidden">
-              {/* Video Background */}
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="absolute inset-0 w-full h-full object-cover z-0"
-                style={{
-                  imageRendering: 'pixelated',
-                  filter: 'contrast(1.2) brightness(0.9) saturate(1.1)',
-                }}
-              >
-                <source src="/tard.mp4" type="video/mp4" />
-              </video>
-              {/* Content Overlay */}
-              <div className="max-w-3xl w-full relative z-10">
-                {!connected ? (
-                  <div className="text-center">
-                    <div className="inline-block mb-4">
-                      <div className="w-12 h-12 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
-                    </div>
-                    <p className="text-muted/70 text-sm">Connecting to system...</p>
+          {/* Main Layout */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-hidden flex gap-3 p-3">
+              {/* Left: Video panel */}
+              <div className="flex-1 lg:w-[calc(100%-440px)] relative overflow-hidden rounded-2xl border border-white/5 bg-black/40">
+                <video
+                  autoPlay loop muted playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                >
+                  <source src="/tard.mp4" type="video/mp4" />
+                </video>
+                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30" />
+
+                {/* Center overlay text */}
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                  <div className="text-center px-6" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.7), 0 0 80px rgba(0,0,0,0.5)' }}>
+                    <p className="text-white text-lg sm:text-2xl font-black uppercase tracking-widest mb-1" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9), 0 4px 40px rgba(0,0,0,0.7)' }}>
+                      They call us
+                    </p>
+                    <p className="text-accent text-4xl sm:text-6xl font-black uppercase tracking-wider mb-2" style={{ textShadow: '0 0 30px rgba(34,197,94,0.6), 0 0 60px rgba(34,197,94,0.3), 0 4px 20px rgba(0,0,0,0.9)' }}>
+                      TARDs
+                    </p>
+                    <p className="text-white text-lg sm:text-2xl font-black uppercase tracking-widest mb-6" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9), 0 4px 40px rgba(0,0,0,0.7)' }}>
+                      because we don&apos;t sell.
+                    </p>
+                    <p className="text-accent text-5xl sm:text-7xl font-black tracking-tighter" style={{ textShadow: '0 0 40px rgba(34,197,94,0.8), 0 0 80px rgba(34,197,94,0.4), 0 0 120px rgba(34,197,94,0.2), 0 4px 30px rgba(0,0,0,0.9)' }}>
+                      $TARD
+                    </p>
                   </div>
-                ) : (
-                  <div className="space-y-6">
-                    {thoughts.length === 0 && (
-                      <div className="text-center py-8">
-                        <p className="text-muted/60 text-sm">Waiting for input...</p>
+                </div>
+
+                {!connected && (
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="text-center">
+                      <div className="inline-block mb-4">
+                        <div className="w-10 h-10 border-2 border-white/10 border-t-accent rounded-full animate-spin" />
                       </div>
-                    )}
+                      <p className="text-white/30 text-sm">Connecting...</p>
+                    </div>
                   </div>
                 )}
               </div>
-              {/* ASCII Text Animation - Positioned at bottom */}
-              <div className="absolute bottom-0 left-0 right-0 w-full z-10">
-                <ASCIIText
-                  text="$TARD"
-                  enableWaves={true}
-                  asciiFontSize={8}
-                  textFontSize={180}
-                  textColor="#00d4ff"
-                  planeBaseHeight={8}
-                />
+
+              {/* Right: Thoughts */}
+              <div className="hidden lg:block w-[400px] shrink-0">
+                <SidePanel thoughts={thoughts} />
               </div>
             </div>
 
-            {/* Right: Thoughts Sidebar */}
-            <div className="hidden lg:block w-[420px] shrink-0">
-              <SidePanel thoughts={thoughts} />
-            </div>
-          </div>
-
-          {/* Message Input */}
-          <div className="border-t border-accent/30 p-4 bg-[#001122]/80">
-            <div className="max-w-4xl mx-auto space-y-2">
-              {/* Error Message */}
+            {/* Bottom: Input Area — full width */}
+            <div className="w-full px-3 pb-3 space-y-2">
+              {/* Notifications */}
               {errorMessage && (
-                <div className="p-3 bg-[#001a2e] border border-accent/50 text-sm text-accent animate-fade-in terminal-border rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <span className="text-accent font-semibold">Error:</span>
-                    <span>{errorMessage}</span>
-                  </div>
+                <div className="w-full p-3 bg-red-500/10 border border-red-500/20 text-sm text-red-400 animate-fade-in rounded-xl flex items-center justify-center gap-2">
+                  <span className="font-semibold">Error:</span>
+                  <span className="text-red-400/80">{errorMessage}</span>
                 </div>
               )}
               
-              {/* Response Notification */}
               {responseNotification && (
-                <div className="p-3 bg-[#001a2e] border border-accent/50 text-sm text-accent animate-fade-in terminal-border glow-accent rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse-glow" />
-                    <span className="text-accent font-semibold">Response:</span>
-                    <span>{responseNotification}</span>
-                  </div>
+                <div className="w-full p-3 bg-accent/10 border border-accent/20 text-sm text-accent animate-fade-in rounded-xl flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-accent rounded-full animate-pulse-glow" />
+                  <span>{responseNotification}</span>
                 </div>
               )}
               
-              {/* Queue Status */}
               {queueStatus && queueStatus.totalQueued > 0 && (
-                <div className="p-3 bg-[#001a2e] border border-accent/30 text-sm text-accent/80 animate-fade-in terminal-border rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 bg-accent rounded-full animate-pulse-glow" />
-                    <span>
-                      {queueStatus.position > 0 ? (
-                        <>Queue Position {queueStatus.position}/{queueStatus.totalQueued}</>
-                      ) : (
-                        <>{queueStatus.totalQueued} message{queueStatus.totalQueued > 1 ? 's' : ''} pending</>
-                      )}
-                      {' • '}ETA: {Math.ceil(queueStatus.estimatedWaitSeconds / 60)}m
-                    </span>
-                  </div>
+                <div className="w-full p-3 bg-white/[0.03] border border-white/10 text-sm text-white/50 animate-fade-in rounded-xl flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-accent rounded-full animate-pulse-glow" />
+                  <span>
+                    {queueStatus.position > 0 ? (
+                      <>Queue position {queueStatus.position}/{queueStatus.totalQueued}</>
+                    ) : (
+                      <>{queueStatus.totalQueued} message{queueStatus.totalQueued > 1 ? 's' : ''} pending</>
+                    )}
+                    {' · '}{Math.ceil(queueStatus.estimatedWaitSeconds)}s
+                  </span>
                 </div>
               )}
               
               <MessageInput onSend={sendMessage} disabled={!connected} />
             </div>
           </div>
-        </div>
 
-        {/* Mobile: Side Panel below */}
-        <div className="lg:hidden border-t border-accent/30 h-[50vh] shrink-0">
-          <SidePanel thoughts={thoughts} />
-        </div>
+          {/* Mobile sidebar */}
+          <div className="lg:hidden border-t border-white/5 h-[50vh] shrink-0">
+            <SidePanel thoughts={thoughts} />
+          </div>
         </div>
       </div>
     </>

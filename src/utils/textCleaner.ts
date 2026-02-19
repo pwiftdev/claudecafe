@@ -8,14 +8,14 @@ export function cleanText(text: string): string {
   let cleaned = text.trim();
   
   // Remove common bracket patterns at the start
-  cleaned = cleaned.replace(/^\[(response|thought|philosophy|endorsement|observation|reflection)\]\s*/i, '');
+  cleaned = cleaned.replace(/^\[(response|thought|degen|meme|alpha|fud|pump)\]\s*/i, '');
   cleaned = cleaned.replace(/^\[.*?\]\s*/, ''); // Remove any [label] at start
   
   // Remove markdown-style labels
-  cleaned = cleaned.replace(/^#+\s*(response|thought|philosophy|endorsement|observation|reflection):\s*/i, '');
+  cleaned = cleaned.replace(/^#+\s*(response|thought|degen|meme|alpha|fud|pump):\s*/i, '');
   
   // Remove "Response:" or "Thought:" prefixes
-  cleaned = cleaned.replace(/^(response|thought|philosophy|endorsement|observation|reflection):\s*/i, '');
+  cleaned = cleaned.replace(/^(response|thought|degen|meme|alpha|fud|pump):\s*/i, '');
   
   // Clean up multiple spaces
   cleaned = cleaned.replace(/\s+/g, ' ');

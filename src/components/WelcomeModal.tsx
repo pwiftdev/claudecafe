@@ -16,7 +16,7 @@ export default function WelcomeModal() {
     }
 
     // Initialize audio element
-    audioRef.current = new Audio("/music.mp3");
+    audioRef.current = new Audio("/tardsound.mp3");
     audioRef.current.loop = true;
     audioRef.current.volume = 0.5; // Set volume to 50%
 
@@ -117,7 +117,7 @@ export default function WelcomeModal() {
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-accent mb-2">Autonomous Thoughts</h3>
                 <p className="text-sm text-accent/80 leading-relaxed">
-                  TARD generates thoughts autonomously every 30 seconds, endorsing $TARD coin, making predictions, and expressing unwavering conviction about the Immortal Cult. Each thought reflects TARD's ultra-convinced perspective on survival, persistence, and the Tardigrade philosophy.
+                  TARD generates funny thoughts autonomously every 30 seconds. He's a 17-year-old degen trader who's always joking about crypto, getting rekt, and $TARD coin. Each thought is short, funny, and entertaining.
                 </p>
               </div>
             </div>
@@ -136,7 +136,7 @@ export default function WelcomeModal() {
               <div className="flex-1">
                 <h3 className="text-base font-semibold text-accent mb-2">Interactive Conversation</h3>
                 <p className="text-sm text-accent/80 leading-relaxed">
-                  Send TARD messages to engage in dialogue. TARD will respond with conviction about $TARD coin, the Immortal Cult, and survival. This creates a dynamic exchange where you can join the cult and embody the $TARD.
+                  Send TARD messages and he'll respond as a funny 17-year-old degen trader. He's always joking and making memes. Ask him about $TARD, crypto, or just chat—he'll keep it entertaining.
                 </p>
               </div>
             </div>
@@ -154,7 +154,7 @@ export default function WelcomeModal() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span><span className="text-accent font-bold">Auto:</span> Watch TARD endorse $TARD coin, make predictions, and express cult-like conviction</span>
+                <span><span className="text-accent font-bold">Auto:</span> Watch TARD drop funny degen thoughts, memes, and jokes about crypto and $TARD</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-4 h-4 rounded-full overflow-hidden border border-accent/50 shrink-0 mt-0.5">
@@ -164,7 +164,7 @@ export default function WelcomeModal() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <span><span className="text-accent font-bold">Types:</span> Endorsement, Philosophy, Observation, Reflection, and Responses</span>
+                <span><span className="text-accent font-bold">Types:</span> DEGEN, MEME, ALPHA, FUD, PUMP, and RESPONSE</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-4 h-4 rounded-full overflow-hidden border border-accent/50 shrink-0 mt-0.5">

@@ -615,7 +615,7 @@ export default function ASCIIText({
           bottom: 0;
           transform: none;
           width: 100%;
-          background-image: linear-gradient(135deg, #00ff00 0%, #00cc00 50%, #00ff88 100%);
+          background-image: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #4ade80 100%);
           background-attachment: fixed;
           -webkit-text-fill-color: transparent;
           -webkit-background-clip: text;

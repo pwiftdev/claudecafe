@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, KeyboardEvent } from "react";
-import { Send, MessageCircle } from "lucide-react";
+import { Send, ArrowUp } from "lucide-react";
 
 interface MessageInputProps {
   onSend: (text: string) => void;
@@ -26,49 +26,43 @@ export default function MessageInput({ onSend, disabled = false }: MessageInputP
     }
   };
 
+  const hasText = text.trim().length > 0;
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-stretch gap-2">
-        <div className="flex-1 relative">
-          <div className="relative h-full">
-            <span className="absolute left-3 top-3 text-accent text-sm pointer-events-none">$</span>
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={disabled ? "Connecting..." : "Share your thoughts..."}
-              disabled={disabled}
-              maxLength={500}
-              rows={1}
-              className="w-full h-full pl-8 pr-16 py-3 bg-[#001a2e] border border-accent/50 rounded-xl text-sm text-accent placeholder:text-muted/50 resize-none focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed terminal-border"
-              style={{
-                minHeight: "48px",
-                maxHeight: "120px",
-              }}
-              onInput={(e) => {
-                const target = e.target as HTMLTextAreaElement;
-                target.style.height = "auto";
-                target.style.height = `${Math.min(target.scrollHeight, 120)}px`;
-              }}
-            />
-            <div className="absolute bottom-2 right-2 flex items-center gap-2">
-              <span className="text-xs text-muted/60">
-                {text.length}/500
-              </span>
-            </div>
-          </div>
-        </div>
-        <button
-          onClick={handleSend}
-          disabled={disabled || !text.trim()}
-          className="px-4 py-3 bg-[#001a2e] hover:bg-accent/10 border border-accent/50 rounded-xl text-accent text-sm font-semibold disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 terminal-border hover:glow-accent disabled:hover:glow-accent self-stretch"
-          style={{
-            minHeight: "48px",
+    <div className="w-full">
+      <div className="relative flex items-center">
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={disabled ? "Connecting..." : "Ask TARD anything ser..."}
+          disabled={disabled}
+          maxLength={500}
+          rows={1}
+          className="w-full pl-5 pr-28 py-4 bg-white/[0.04] border border-white/10 rounded-2xl text-[14px] text-white/90 placeholder:text-white/25 resize-none focus:outline-none focus:border-accent/50 focus:bg-white/[0.06] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ minHeight: "56px", maxHeight: "140px" }}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = "auto";
+            target.style.height = `${Math.min(target.scrollHeight, 140)}px`;
           }}
-        >
-          <Send className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">SEND</span>
-        </button>
+        />
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          <span className="text-[11px] text-white/20 font-medium tabular-nums">
+            {text.length}/500
+          </span>
+          <button
+            onClick={handleSend}
+            disabled={disabled || !hasText}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+              hasText && !disabled
+                ? "bg-accent text-background hover:bg-accent-light shadow-lg shadow-accent/25 cursor-pointer"
+                : "bg-white/5 text-white/20 cursor-not-allowed"
+            }`}
+          >
+            <ArrowUp className="w-5 h-5" strokeWidth={2.5} />
+          </button>
+        </div>
       </div>
     </div>
   );
