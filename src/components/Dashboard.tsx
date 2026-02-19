@@ -11,6 +11,7 @@ import ChatPanel from "./ChatPanel";
 import type { AIThought, BroadcastState, UserMessage } from "@/game/types";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+const CYRILLIC_RE = /[\u0400-\u04FF]/;
 
 if (typeof window !== "undefined") {
   console.log("[Dashboard] Backend URL:", BACKEND_URL);
@@ -56,7 +57,7 @@ export default function Dashboard() {
     socket.on("state", (newState: BroadcastState) => {
       setState(newState);
       setThoughts(newState.thoughts);
-      setMessages(newState.recentMessages);
+      setMessages(newState.recentMessages.filter(m => !CYRILLIC_RE.test(m.text)));
       setViewerCount(newState.viewerCount);
       
       if (socketIdRef.current) {
@@ -100,6 +101,7 @@ export default function Dashboard() {
     });
 
     socket.on("messageReceived", (message: { id: string; userId: string; text: string; timestamp: number; responded: boolean }) => {
+      if (CYRILLIC_RE.test(message.text)) return;
       setMessages(prev => {
         if (prev.some(m => m.id === message.id)) return prev;
         return [message, ...prev];
