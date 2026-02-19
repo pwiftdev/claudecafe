@@ -135,7 +135,7 @@ export default function Dashboard() {
               <div className="flex-1 lg:w-[calc(100%-440px)] relative overflow-hidden rounded-2xl border border-white/5 bg-black/40">
                 <video
                   autoPlay loop muted playsInline
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain bg-black"
                 >
                   <source src="/tard.mp4" type="video/mp4" />
                 </video>
