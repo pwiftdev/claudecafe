@@ -6,6 +6,7 @@ import Header from "./Header";
 import SidePanel from "./SidePanel";
 import MessageInput from "./MessageInput";
 import WelcomeModal from "./WelcomeModal";
+import BouncingLogos from "./BouncingLogos";
 import type { AIThought, BroadcastState } from "@/game/types";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
@@ -135,11 +136,14 @@ export default function Dashboard() {
               <div className="flex-1 lg:w-[calc(100%-440px)] relative overflow-hidden rounded-2xl border border-white/5 bg-black/40">
                 <video
                   autoPlay loop muted playsInline
-                  className="absolute inset-0 w-full h-full object-contain bg-black"
+                  className="absolute inset-0 w-full h-full object-cover"
                 >
                   <source src="/tard.mp4" type="video/mp4" />
                 </video>
                 <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30" />
+
+                {/* Bouncing logos */}
+                <BouncingLogos />
 
                 {/* Center overlay text */}
                 <div className="absolute inset-0 flex items-center justify-center z-10">
