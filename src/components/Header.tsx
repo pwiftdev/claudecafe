@@ -28,7 +28,7 @@ export default function Header({ viewerCount = 0, connected = false }: HeaderPro
             <h1 className="text-sm sm:text-base md:text-xl font-black text-foreground tracking-tight glow-accent" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>Kang and Kodos</h1>
             <span className="text-[8px] sm:text-[9px] md:text-[10px] font-black bg-accent text-background px-1 sm:px-1.5 md:px-2 py-0.5 sm:py-0.5 md:py-1 rounded-md sm:rounded-lg uppercase tracking-wider shadow-md">AI</span>
           </div>
-          <p className="text-[10px] sm:text-[11px] md:text-[12px] text-foreground/70 font-bold">aliens from Rigel 7</p>
+          <p className="text-[10px] sm:text-[11px] md:text-[12px] text-foreground/70 font-bold">aliens from Rigel 7 · <span className="text-accent font-black">$RIGELLIANS</span></p>
         </div>
       </div>
 
