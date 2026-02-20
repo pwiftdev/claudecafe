@@ -155,7 +155,6 @@ export default function Dashboard() {
                 >
                   <source src="/kangkodosvideo.mp4" type="video/mp4" />
                 </video>
-                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30" />
                 
                 {/* Top text */}
                 <div className="absolute top-4 left-0 right-0 z-10 flex justify-center">
@@ -192,21 +191,28 @@ export default function Dashboard() {
                   muted
                   playsInline
                   preload="auto"
-                  className="absolute inset-0 w-full h-full object-cover"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    zIndex: 1
+                  }}
                 >
                   <source src="/kangkodosvideo.mp4" type="video/mp4" />
                 </video>
-                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30 pointer-events-none" />
                 
                 {/* Top text */}
-                <div className="absolute top-2 left-0 right-0 z-10 flex justify-center pointer-events-none">
+                <div className="absolute top-2 left-0 right-0 z-10 flex justify-center pointer-events-none" style={{ zIndex: 3 }}>
                   <p className="text-white text-sm font-black px-3 py-1.5 bg-black/60 rounded-lg border-2 border-accent shadow-lg" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>
                     Yes, the LEFT one is Kang.
                   </p>
                 </div>
 
                 {!connected && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                  <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none" style={{ zIndex: 3 }}>
                     <div className="text-center">
                       <div className="inline-block mb-2">
                         <div className="w-8 h-8 border-2 border-white/10 border-t-accent rounded-full animate-spin" />
