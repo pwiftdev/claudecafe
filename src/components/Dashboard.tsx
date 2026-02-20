@@ -49,6 +49,7 @@ export default function Dashboard() {
   const socketIdRef = useRef<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [videoPlaying, setVideoPlaying] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
     const socket = io(BACKEND_URL, {
@@ -153,13 +154,14 @@ export default function Dashboard() {
   };
 
   const handleVideoPlay = useCallback(async () => {
-    if (videoRef.current) {
-      try {
-        await videoRef.current.play();
-        setVideoPlaying(true);
-      } catch (error) {
-        console.error("Error playing video:", error);
-      }
+    const video = videoRef.current;
+    if (!video) return;
+    try {
+      video.load();
+      await video.play();
+      setVideoPlaying(true);
+    } catch (error) {
+      console.error("[VIDEO] play failed:", error);
     }
   }, []);
 
@@ -169,14 +171,25 @@ export default function Dashboard() {
 
     const onPlay = () => setVideoPlaying(true);
     const onPause = () => setVideoPlaying(false);
+    const onCanPlay = () => setVideoReady(true);
+    const onTimeUpdate = () => {
+      if (video.currentTime > 0) {
+        setVideoReady(true);
+        setVideoPlaying(true);
+      }
+    };
 
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
+    video.addEventListener("canplay", onCanPlay);
+    video.addEventListener("timeupdate", onTimeUpdate);
     setVideoPlaying(!video.paused);
 
     return () => {
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
+      video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("timeupdate", onTimeUpdate);
     };
   }, [isDesktop]);
 
@@ -266,28 +279,39 @@ export default function Dashboard() {
                 <div 
                   className="w-full shrink-0 border-b-4 border-accent relative bg-black" 
                   style={{ height: '70vh', minHeight: '500px', overflow: 'hidden' }}
-                  onClick={() => !videoPlaying && handleVideoPlay()}
+                  onClick={handleVideoPlay}
                 >
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    preload="auto"
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      height: '100%',
+                  {/* Raw HTML video to ensure iOS-specific attributes are set correctly */}
+                  <div
+                    ref={(el) => {
+                      if (el && !videoRef.current) {
+                        const v = el.querySelector("video");
+                        if (v) {
+                          videoRef.current = v;
+                          v.play().catch(() => {});
+                        }
+                      }
                     }}
-                  >
-                    <source src="/kangkodosvideo.mp4" type="video/mp4" />
-                  </video>
+                    style={{ width: '100%', height: '100%' }}
+                    dangerouslySetInnerHTML={{
+                      __html: `<video
+                        autoplay
+                        loop
+                        muted
+                        playsinline
+                        webkit-playsinline
+                        preload="auto"
+                        poster="/kangkodoslogo.png"
+                        style="display:block;width:100%;height:100%;background:#000;"
+                      ><source src="/kangkodosvideo.mp4" type="video/mp4"></video>`
+                    }}
+                  />
                   
-                  {!videoPlaying && (
+                  {/* Tap to play — shown until video actually produces frames */}
+                  {!videoReady && (
                     <div 
                       className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                      style={{ zIndex: 2, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+                      style={{ zIndex: 2, backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
                       onClick={(e) => { e.stopPropagation(); handleVideoPlay(); }}
                     >
                       <div className="flex flex-col items-center gap-3">
@@ -305,7 +329,7 @@ export default function Dashboard() {
                     </p>
                   </div>
 
-                  {!connected && (
+                  {!connected && !videoReady && (
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 3 }}>
                       <div className="text-center">
                         <div className="inline-block mb-2">
