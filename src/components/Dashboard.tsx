@@ -217,7 +217,6 @@ export default function Dashboard() {
                       className="absolute inset-0 w-full h-full object-cover"
                     >
                       <source src="/kangkodosvideo.mov" type="video/quicktime" />
-                      <source src="/kangkodosvideo.mp4" type="video/mp4" />
                     </video>
                     
                     <div className="absolute top-4 left-0 right-0 z-10 flex justify-center">
@@ -304,7 +303,7 @@ export default function Dashboard() {
                         preload="auto"
                         poster="/kangkodoslogo.png"
                         style="display:block;width:100%;height:100%;object-fit:cover;background:#000;"
-                      ><source src="/kangkodosvideo.mov" type="video/quicktime"><source src="/kangkodosvideo.mp4" type="video/mp4"></video>`
+                      ><source src="/kangkodosvideo.mov" type="video/quicktime"></video>`
                     }}
                   />
                   
