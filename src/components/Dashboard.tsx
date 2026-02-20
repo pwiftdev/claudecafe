@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
+import { Play } from "lucide-react";
 import Header from "./Header";
 import SidePanel from "./SidePanel";
 import MessageInput from "./MessageInput";
@@ -28,6 +29,10 @@ export default function Dashboard() {
   const socketRef = useRef<Socket | null>(null);
   const sentMessagesRef = useRef<Set<string>>(new Set());
   const socketIdRef = useRef<string | null>(null);
+  const mobileVideoRef = useRef<HTMLVideoElement | null>(null);
+  const desktopVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [mobileVideoPlaying, setMobileVideoPlaying] = useState(false);
+  const [desktopVideoPlaying, setDesktopVideoPlaying] = useState(false);
 
   useEffect(() => {
     const socket = io(BACKEND_URL, {
@@ -131,6 +136,53 @@ export default function Dashboard() {
     }
   };
 
+  const handleVideoPlay = async (videoRef: React.RefObject<HTMLVideoElement>, setPlaying: (playing: boolean) => void) => {
+    if (videoRef.current) {
+      try {
+        await videoRef.current.play();
+        setPlaying(true);
+      } catch (error) {
+        console.error("Error playing video:", error);
+      }
+    }
+  };
+
+  // Check if videos are playing
+  useEffect(() => {
+    const mobileVideo = mobileVideoRef.current;
+    const desktopVideo = desktopVideoRef.current;
+
+    const handleMobilePlay = () => setMobileVideoPlaying(true);
+    const handleMobilePause = () => setMobileVideoPlaying(false);
+    const handleDesktopPlay = () => setDesktopVideoPlaying(true);
+    const handleDesktopPause = () => setDesktopVideoPlaying(false);
+
+    if (mobileVideo) {
+      mobileVideo.addEventListener("play", handleMobilePlay);
+      mobileVideo.addEventListener("pause", handleMobilePause);
+      // Check initial state
+      setMobileVideoPlaying(!mobileVideo.paused);
+    }
+
+    if (desktopVideo) {
+      desktopVideo.addEventListener("play", handleDesktopPlay);
+      desktopVideo.addEventListener("pause", handleDesktopPause);
+      // Check initial state
+      setDesktopVideoPlaying(!desktopVideo.paused);
+    }
+
+    return () => {
+      if (mobileVideo) {
+        mobileVideo.removeEventListener("play", handleMobilePlay);
+        mobileVideo.removeEventListener("pause", handleMobilePause);
+      }
+      if (desktopVideo) {
+        desktopVideo.removeEventListener("play", handleDesktopPlay);
+        desktopVideo.removeEventListener("pause", handleDesktopPause);
+      }
+    };
+  }, []);
+
   return (
     <>
       <WelcomeModal />
@@ -150,6 +202,7 @@ export default function Dashboard() {
               {/* Center: Video panel */}
               <div className="flex-1 relative overflow-hidden rounded-3xl border-4 border-accent bg-black/20 shadow-elegant-lg">
                 <video
+                  ref={desktopVideoRef}
                   autoPlay loop muted playsInline
                   className="absolute inset-0 w-full h-full object-cover"
                 >
@@ -184,8 +237,13 @@ export default function Dashboard() {
             {/* Mobile: Vertical layout - Scrollable */}
             <div className="lg:hidden flex flex-col flex-1 overflow-y-auto min-h-0">
               {/* Video panel */}
-              <div className="w-full shrink-0 border-b-4 border-accent relative overflow-hidden bg-black" style={{ height: '70vh', minHeight: '500px' }}>
+              <div 
+                className="w-full shrink-0 border-b-4 border-accent relative overflow-hidden bg-black" 
+                style={{ height: '70vh', minHeight: '500px' }}
+                onClick={() => !mobileVideoPlaying && handleVideoPlay(mobileVideoRef, setMobileVideoPlaying)}
+              >
                 <video
+                  ref={mobileVideoRef}
                   autoPlay
                   loop
                   muted
@@ -203,6 +261,25 @@ export default function Dashboard() {
                 >
                   <source src="/kangkodosvideo.mp4" type="video/mp4" />
                 </video>
+                
+                {/* Play button overlay - shows when video is not playing */}
+                {!mobileVideoPlaying && (
+                  <div 
+                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                    style={{ zIndex: 2, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVideoPlay(mobileVideoRef, setMobileVideoPlaying);
+                    }}
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-16 h-16 bg-accent/90 rounded-full flex items-center justify-center shadow-lg border-4 border-accent">
+                        <Play className="w-8 h-8 text-white ml-1" fill="white" />
+                      </div>
+                      <p className="text-white text-sm font-bold">Tap to play</p>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Top text */}
                 <div className="absolute top-2 left-0 right-0 z-10 flex justify-center pointer-events-none" style={{ zIndex: 3 }}>
