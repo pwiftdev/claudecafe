@@ -136,7 +136,7 @@ export default function Dashboard() {
     }
   };
 
-  const handleVideoPlay = async (videoRef: React.RefObject<HTMLVideoElement>, setPlaying: (playing: boolean) => void) => {
+  const handleVideoPlay = async (videoRef: React.RefObject<HTMLVideoElement | null>, setPlaying: (playing: boolean) => void) => {
     if (videoRef.current) {
       try {
         await videoRef.current.play();
