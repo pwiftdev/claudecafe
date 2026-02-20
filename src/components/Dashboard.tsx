@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
 import { Play } from "lucide-react";
 import Header from "./Header";
@@ -12,12 +12,30 @@ import type { AIThought, BroadcastState, UserMessage } from "@/game/types";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 const CYRILLIC_RE = /[\u0400-\u04FF]/;
+const LG_BREAKPOINT = 1024;
 
 if (typeof window !== "undefined") {
   console.log("[Dashboard] Backend URL:", BACKEND_URL);
 }
 
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth >= LG_BREAKPOINT : true
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia(`(min-width: ${LG_BREAKPOINT}px)`);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mql.addEventListener("change", handler);
+    setIsDesktop(mql.matches);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+
+  return isDesktop;
+}
+
 export default function Dashboard() {
+  const isDesktop = useIsDesktop();
   const [thoughts, setThoughts] = useState<AIThought[]>([]);
   const [messages, setMessages] = useState<UserMessage[]>([]);
   const [state, setState] = useState<BroadcastState | null>(null);
@@ -29,10 +47,8 @@ export default function Dashboard() {
   const socketRef = useRef<Socket | null>(null);
   const sentMessagesRef = useRef<Set<string>>(new Set());
   const socketIdRef = useRef<string | null>(null);
-  const mobileVideoRef = useRef<HTMLVideoElement | null>(null);
-  const desktopVideoRef = useRef<HTMLVideoElement | null>(null);
-  const [mobileVideoPlaying, setMobileVideoPlaying] = useState(false);
-  const [desktopVideoPlaying, setDesktopVideoPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoPlaying, setVideoPlaying] = useState(false);
 
   useEffect(() => {
     const socket = io(BACKEND_URL, {
@@ -136,52 +152,33 @@ export default function Dashboard() {
     }
   };
 
-  const handleVideoPlay = async (videoRef: React.RefObject<HTMLVideoElement | null>, setPlaying: (playing: boolean) => void) => {
+  const handleVideoPlay = useCallback(async () => {
     if (videoRef.current) {
       try {
         await videoRef.current.play();
-        setPlaying(true);
+        setVideoPlaying(true);
       } catch (error) {
         console.error("Error playing video:", error);
       }
     }
-  };
+  }, []);
 
-  // Check if videos are playing
   useEffect(() => {
-    const mobileVideo = mobileVideoRef.current;
-    const desktopVideo = desktopVideoRef.current;
+    const video = videoRef.current;
+    if (!video) return;
 
-    const handleMobilePlay = () => setMobileVideoPlaying(true);
-    const handleMobilePause = () => setMobileVideoPlaying(false);
-    const handleDesktopPlay = () => setDesktopVideoPlaying(true);
-    const handleDesktopPause = () => setDesktopVideoPlaying(false);
+    const onPlay = () => setVideoPlaying(true);
+    const onPause = () => setVideoPlaying(false);
 
-    if (mobileVideo) {
-      mobileVideo.addEventListener("play", handleMobilePlay);
-      mobileVideo.addEventListener("pause", handleMobilePause);
-      // Check initial state
-      setMobileVideoPlaying(!mobileVideo.paused);
-    }
-
-    if (desktopVideo) {
-      desktopVideo.addEventListener("play", handleDesktopPlay);
-      desktopVideo.addEventListener("pause", handleDesktopPause);
-      // Check initial state
-      setDesktopVideoPlaying(!desktopVideo.paused);
-    }
+    video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+    setVideoPlaying(!video.paused);
 
     return () => {
-      if (mobileVideo) {
-        mobileVideo.removeEventListener("play", handleMobilePlay);
-        mobileVideo.removeEventListener("pause", handleMobilePause);
-      }
-      if (desktopVideo) {
-        desktopVideo.removeEventListener("play", handleDesktopPlay);
-        desktopVideo.removeEventListener("pause", handleDesktopPause);
-      }
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
     };
-  }, []);
+  }, [isDesktop]);
 
   return (
     <>
@@ -190,197 +187,177 @@ export default function Dashboard() {
         <div className="relative z-10 flex flex-col h-full">
           <Header viewerCount={viewerCount} connected={connected} />
 
-          {/* Main Layout */}
-          <div className="flex-1 flex flex-col lg:overflow-hidden">
-            {/* Desktop: Horizontal layout */}
-            <div className="hidden lg:flex flex-1 overflow-hidden gap-3 p-3">
-              {/* Left: Chat panel */}
-              <div className="w-[320px] shrink-0">
-                <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
-              </div>
+          {/* Main Layout — conditional render so only ONE <video> element exists in DOM */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            {isDesktop ? (
+              <>
+                {/* Desktop: Horizontal layout */}
+                <div className="flex flex-1 overflow-hidden gap-3 p-3">
+                  <div className="w-[320px] shrink-0">
+                    <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
+                  </div>
 
-              {/* Center: Video panel */}
-              <div className="flex-1 relative overflow-hidden rounded-3xl border-4 border-accent bg-black/20 shadow-elegant-lg">
-                <video
-                  ref={desktopVideoRef}
-                  autoPlay loop muted playsInline
-                  className="absolute inset-0 w-full h-full object-cover"
-                >
-                  <source src="/kangkodosvideo.mp4" type="video/mp4" />
-                </video>
-                
-                {/* Top text */}
-                <div className="absolute top-4 left-0 right-0 z-10 flex justify-center">
-                  <p className="text-white text-lg font-black px-4 py-2 bg-black/60 rounded-xl border-2 border-accent shadow-lg" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>
-                    Yes, the LEFT one is Kang.
-                  </p>
+                  <div className="flex-1 relative overflow-hidden rounded-3xl border-4 border-accent bg-black/20 shadow-elegant-lg">
+                    <video
+                      ref={videoRef}
+                      autoPlay loop muted playsInline
+                      className="absolute inset-0 w-full h-full object-cover"
+                    >
+                      <source src="/kangkodosvideo.mp4" type="video/mp4" />
+                    </video>
+                    
+                    <div className="absolute top-4 left-0 right-0 z-10 flex justify-center">
+                      <p className="text-white text-lg font-black px-4 py-2 bg-black/60 rounded-xl border-2 border-accent shadow-lg" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>
+                        Yes, the LEFT one is Kang.
+                      </p>
+                    </div>
+
+                    {!connected && (
+                      <div className="absolute inset-0 flex items-center justify-center z-10">
+                        <div className="text-center">
+                          <div className="inline-block mb-4">
+                            <div className="w-10 h-10 border-2 border-white/10 border-t-accent rounded-full animate-spin" />
+                          </div>
+                          <p className="text-white/30 text-sm">Connecting...</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="w-[320px] shrink-0">
+                    <SidePanel thoughts={thoughts} />
+                  </div>
                 </div>
 
-                {!connected && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <div className="text-center">
-                      <div className="inline-block mb-4">
-                        <div className="w-10 h-10 border-2 border-white/10 border-t-accent rounded-full animate-spin" />
-                      </div>
-                      <p className="text-white/30 text-sm">Connecting...</p>
+                {/* Desktop: Bottom Input Area */}
+                <div className="w-full px-3 pb-3 space-y-2">
+                  {errorMessage && (
+                    <div className="w-full p-4 bg-red-500/20 border-4 border-red-500 text-sm text-red-700 animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                      <span className="font-black">Error:</span>
+                      <span>{errorMessage}</span>
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Right: Thoughts */}
-              <div className="w-[320px] shrink-0">
-                <SidePanel thoughts={thoughts} />
-              </div>
-            </div>
-
-            {/* Mobile: Vertical layout - Scrollable */}
-            <div className="lg:hidden flex flex-col flex-1 overflow-y-auto min-h-0">
-              {/* Video panel — uses transform scaling instead of object-fit for iOS Safari */}
-              <div 
-                className="w-full shrink-0 border-b-4 border-accent relative bg-black" 
-                style={{ height: '70vh', minHeight: '500px', overflow: 'hidden' }}
-                onClick={() => !mobileVideoPlaying && handleVideoPlay(mobileVideoRef, setMobileVideoPlaying)}
-              >
-                <video
-                  ref={mobileVideoRef}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="auto"
-                  style={{
-                    display: 'block',
-                    minWidth: '100%',
-                    minHeight: '100%',
-                    width: 'auto',
-                    height: 'auto',
-                    position: 'relative',
-                    top: '50%',
-                    left: '50%',
-                    WebkitTransform: 'translate(-50%, -50%) translateZ(0)',
-                    transform: 'translate(-50%, -50%) translateZ(0)',
-                  }}
+                  )}
+                  {responseNotification && (
+                    <div className="w-full p-4 bg-accent/20 border-4 border-accent text-sm text-accent-dark animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                      <div className="w-3 h-3 bg-accent rounded-full animate-pulse-glow border-2 border-accent-dark" />
+                      <span>{responseNotification}</span>
+                    </div>
+                  )}
+                  {queueStatus && queueStatus.totalQueued > 0 && (
+                    <div className="w-full p-4 bg-success/20 border-4 border-success text-sm text-[var(--color-success-dark)] animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                      <div className="w-3 h-3 bg-success rounded-full animate-pulse-glow border-2 border-[var(--color-success-dark)]" />
+                      <span>
+                        {queueStatus.position > 0 ? (
+                          <>Queue position {queueStatus.position}/{queueStatus.totalQueued}</>
+                        ) : (
+                          <>{queueStatus.totalQueued} message{queueStatus.totalQueued > 1 ? 's' : ''} pending</>
+                        )}
+                        {' · '}{Math.ceil(queueStatus.estimatedWaitSeconds)}s
+                      </span>
+                    </div>
+                  )}
+                  <MessageInput onSend={sendMessage} disabled={!connected} />
+                </div>
+              </>
+            ) : (
+              /* Mobile: Vertical scrollable layout — single video element */
+              <div className="flex flex-col flex-1 overflow-y-auto min-h-0">
+                {/* Video panel */}
+                <div 
+                  className="w-full shrink-0 border-b-4 border-accent relative bg-black" 
+                  style={{ height: '70vh', minHeight: '500px', overflow: 'hidden' }}
+                  onClick={() => !videoPlaying && handleVideoPlay()}
                 >
-                  <source src="/kangkodosvideo.mp4" type="video/mp4" />
-                </video>
-                
-                {/* Play button overlay - shows when video is not playing */}
-                {!mobileVideoPlaying && (
-                  <div 
-                    className="absolute inset-0 flex items-center justify-center cursor-pointer"
-                    style={{ zIndex: 2, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleVideoPlay(mobileVideoRef, setMobileVideoPlaying);
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    preload="auto"
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      height: '100%',
                     }}
                   >
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-16 h-16 bg-accent/90 rounded-full flex items-center justify-center shadow-lg border-4 border-accent">
-                        <Play className="w-8 h-8 text-white ml-1" fill="white" />
+                    <source src="/kangkodosvideo.mp4" type="video/mp4" />
+                  </video>
+                  
+                  {!videoPlaying && (
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center cursor-pointer"
+                      style={{ zIndex: 2, backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+                      onClick={(e) => { e.stopPropagation(); handleVideoPlay(); }}
+                    >
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-16 h-16 bg-accent/90 rounded-full flex items-center justify-center shadow-lg border-4 border-accent">
+                          <Play className="w-8 h-8 text-white ml-1" fill="white" />
+                        </div>
+                        <p className="text-white text-sm font-bold">Tap to play</p>
                       </div>
-                      <p className="text-white text-sm font-bold">Tap to play</p>
                     </div>
+                  )}
+                  
+                  <div className="absolute top-2 left-0 right-0 flex justify-center pointer-events-none" style={{ zIndex: 3 }}>
+                    <p className="text-white text-sm font-black px-3 py-1.5 bg-black/60 rounded-lg border-2 border-accent shadow-lg" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>
+                      Yes, the LEFT one is Kang.
+                    </p>
                   </div>
-                )}
-                
-                {/* Top text */}
-                <div className="absolute top-2 left-0 right-0 flex justify-center pointer-events-none" style={{ zIndex: 3 }}>
-                  <p className="text-white text-sm font-black px-3 py-1.5 bg-black/60 rounded-lg border-2 border-accent shadow-lg" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>
-                    Yes, the LEFT one is Kang.
-                  </p>
-                </div>
 
-                {!connected && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 3 }}>
-                    <div className="text-center">
-                      <div className="inline-block mb-2">
-                        <div className="w-8 h-8 border-2 border-white/10 border-t-accent rounded-full animate-spin" />
+                  {!connected && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 3 }}>
+                      <div className="text-center">
+                        <div className="inline-block mb-2">
+                          <div className="w-8 h-8 border-2 border-white/10 border-t-accent rounded-full animate-spin" />
+                        </div>
+                        <p className="text-white/30 text-xs">Connecting...</p>
                       </div>
-                      <p className="text-white/30 text-xs">Connecting...</p>
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Thoughts panel */}
-              <div className="h-[60vh] border-b-4 border-accent">
-                <SidePanel thoughts={thoughts} />
-              </div>
-
-              {/* Chat panel */}
-              <div className="min-h-[55vh]">
-                <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
-              </div>
-
-              {/* Bottom: Input Area — full width */}
-              <div className="w-full px-3 pb-3 pt-3 space-y-2">
-                {/* Notifications */}
-                {errorMessage && (
-                  <div className="w-full p-4 bg-red-500/20 border-4 border-red-500 text-sm text-red-700 animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
-                    <span className="font-black">Error:</span>
-                    <span>{errorMessage}</span>
-                  </div>
-                )}
-                
-                {responseNotification && (
-                  <div className="w-full p-4 bg-accent/20 border-4 border-accent text-sm text-accent-dark animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
-                    <div className="w-3 h-3 bg-accent rounded-full animate-pulse-glow border-2 border-accent-dark" />
-                    <span>{responseNotification}</span>
-                  </div>
-                )}
-                
-                {queueStatus && queueStatus.totalQueued > 0 && (
-                  <div className="w-full p-4 bg-success/20 border-4 border-success text-sm text-[var(--color-success-dark)] animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
-                    <div className="w-3 h-3 bg-success rounded-full animate-pulse-glow border-2 border-[var(--color-success-dark)]" />
-                    <span>
-                      {queueStatus.position > 0 ? (
-                        <>Queue position {queueStatus.position}/{queueStatus.totalQueued}</>
-                      ) : (
-                        <>{queueStatus.totalQueued} message{queueStatus.totalQueued > 1 ? 's' : ''} pending</>
-                      )}
-                      {' · '}{Math.ceil(queueStatus.estimatedWaitSeconds)}s
-                    </span>
-                  </div>
-                )}
-                
-                <MessageInput onSend={sendMessage} disabled={!connected} />
-              </div>
-            </div>
-
-            {/* Desktop: Bottom Input Area */}
-            <div className="hidden lg:block w-full px-3 pb-3 space-y-2">
-              {/* Notifications */}
-              {errorMessage && (
-                <div className="w-full p-4 bg-red-500/20 border-4 border-red-500 text-sm text-red-700 animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
-                  <span className="font-black">Error:</span>
-                  <span>{errorMessage}</span>
+                  )}
                 </div>
-              )}
-              
-              {responseNotification && (
-                <div className="w-full p-4 bg-accent/20 border-4 border-accent text-sm text-accent-dark animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
-                  <div className="w-3 h-3 bg-accent rounded-full animate-pulse-glow border-2 border-accent-dark" />
-                  <span>{responseNotification}</span>
+
+                {/* Thoughts panel */}
+                <div className="h-[60vh] border-b-4 border-accent">
+                  <SidePanel thoughts={thoughts} />
                 </div>
-              )}
-              
-              {queueStatus && queueStatus.totalQueued > 0 && (
-                <div className="w-full p-4 bg-success/20 border-4 border-success text-sm text-[var(--color-success-dark)] animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
-                  <div className="w-3 h-3 bg-success rounded-full animate-pulse-glow border-2 border-[var(--color-success-dark)]" />
-                  <span>
-                    {queueStatus.position > 0 ? (
-                      <>Queue position {queueStatus.position}/{queueStatus.totalQueued}</>
-                    ) : (
-                      <>{queueStatus.totalQueued} message{queueStatus.totalQueued > 1 ? 's' : ''} pending</>
-                    )}
-                    {' · '}{Math.ceil(queueStatus.estimatedWaitSeconds)}s
-                  </span>
+
+                {/* Chat panel */}
+                <div className="min-h-[55vh]">
+                  <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
                 </div>
-              )}
-              
-              <MessageInput onSend={sendMessage} disabled={!connected} />
-            </div>
+
+                {/* Bottom: Input Area */}
+                <div className="w-full px-3 pb-3 pt-3 space-y-2">
+                  {errorMessage && (
+                    <div className="w-full p-4 bg-red-500/20 border-4 border-red-500 text-sm text-red-700 animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                      <span className="font-black">Error:</span>
+                      <span>{errorMessage}</span>
+                    </div>
+                  )}
+                  {responseNotification && (
+                    <div className="w-full p-4 bg-accent/20 border-4 border-accent text-sm text-accent-dark animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                      <div className="w-3 h-3 bg-accent rounded-full animate-pulse-glow border-2 border-accent-dark" />
+                      <span>{responseNotification}</span>
+                    </div>
+                  )}
+                  {queueStatus && queueStatus.totalQueued > 0 && (
+                    <div className="w-full p-4 bg-success/20 border-4 border-success text-sm text-[var(--color-success-dark)] animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                      <div className="w-3 h-3 bg-success rounded-full animate-pulse-glow border-2 border-[var(--color-success-dark)]" />
+                      <span>
+                        {queueStatus.position > 0 ? (
+                          <>Queue position {queueStatus.position}/{queueStatus.totalQueued}</>
+                        ) : (
+                          <>{queueStatus.totalQueued} message{queueStatus.totalQueued > 1 ? 's' : ''} pending</>
+                        )}
+                        {' · '}{Math.ceil(queueStatus.estimatedWaitSeconds)}s
+                      </span>
+                    </div>
+                  )}
+                  <MessageInput onSend={sendMessage} disabled={!connected} />
+                </div>
+              </div>
+            )}
           </div>
 
         </div>
