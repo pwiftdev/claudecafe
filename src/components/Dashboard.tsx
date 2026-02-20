@@ -185,24 +185,25 @@ export default function Dashboard() {
             {/* Mobile: Vertical layout - Scrollable */}
             <div className="lg:hidden flex flex-col flex-1 overflow-y-auto">
               {/* Video panel */}
-              <div className="min-h-[40vh] relative overflow-hidden border-b-4 border-accent">
+              <div className="h-[45vh] w-full relative overflow-hidden border-b-4 border-accent bg-black">
                 <video
                   autoPlay loop muted playsInline
                   className="absolute inset-0 w-full h-full object-cover"
+                  style={{ minHeight: '100%', minWidth: '100%' }}
                 >
                   <source src="/kangkodosvideo.mp4" type="video/mp4" />
                 </video>
-                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30 pointer-events-none" />
                 
                 {/* Top text */}
-                <div className="absolute top-2 left-0 right-0 z-10 flex justify-center">
+                <div className="absolute top-2 left-0 right-0 z-10 flex justify-center pointer-events-none">
                   <p className="text-white text-sm font-black px-3 py-1.5 bg-black/60 rounded-lg border-2 border-accent shadow-lg" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>
                     Yes, the LEFT one is Kang.
                   </p>
                 </div>
 
                 {!connected && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                  <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
                     <div className="text-center">
                       <div className="inline-block mb-2">
                         <div className="w-8 h-8 border-2 border-white/10 border-t-accent rounded-full animate-spin" />
@@ -214,12 +215,12 @@ export default function Dashboard() {
               </div>
 
               {/* Thoughts panel */}
-              <div className="min-h-[30vh] border-b-4 border-accent">
+              <div className="h-[60vh] border-b-4 border-accent">
                 <SidePanel thoughts={thoughts} />
               </div>
 
               {/* Chat panel */}
-              <div className="min-h-[40vh]">
+              <div className="min-h-[55vh]">
                 <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
               </div>
 
