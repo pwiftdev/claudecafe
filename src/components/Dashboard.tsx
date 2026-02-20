@@ -236,7 +236,7 @@ export default function Dashboard() {
 
             {/* Mobile: Vertical layout - Scrollable */}
             <div className="lg:hidden flex flex-col flex-1 overflow-y-auto min-h-0">
-              {/* Video panel */}
+              {/* Video panel — NO absolute positioning on <video> for iOS Safari compatibility */}
               <div 
                 className="w-full shrink-0 border-b-4 border-accent relative overflow-hidden bg-black" 
                 style={{ height: '70vh', minHeight: '500px' }}
@@ -250,13 +250,10 @@ export default function Dashboard() {
                   playsInline
                   preload="auto"
                   style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
+                    display: 'block',
                     width: '100%',
                     height: '100%',
                     objectFit: 'cover',
-                    zIndex: 1
                   }}
                 >
                   <source src="/kangkodosvideo.mp4" type="video/mp4" />
@@ -282,14 +279,14 @@ export default function Dashboard() {
                 )}
                 
                 {/* Top text */}
-                <div className="absolute top-2 left-0 right-0 z-10 flex justify-center pointer-events-none" style={{ zIndex: 3 }}>
+                <div className="absolute top-2 left-0 right-0 flex justify-center pointer-events-none" style={{ zIndex: 3 }}>
                   <p className="text-white text-sm font-black px-3 py-1.5 bg-black/60 rounded-lg border-2 border-accent shadow-lg" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>
                     Yes, the LEFT one is Kang.
                   </p>
                 </div>
 
                 {!connected && (
-                  <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none" style={{ zIndex: 3 }}>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 3 }}>
                     <div className="text-center">
                       <div className="inline-block mb-2">
                         <div className="w-8 h-8 border-2 border-white/10 border-t-accent rounded-full animate-spin" />
