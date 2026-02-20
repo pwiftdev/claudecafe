@@ -236,10 +236,10 @@ export default function Dashboard() {
 
             {/* Mobile: Vertical layout - Scrollable */}
             <div className="lg:hidden flex flex-col flex-1 overflow-y-auto min-h-0">
-              {/* Video panel — NO absolute positioning on <video> for iOS Safari compatibility */}
+              {/* Video panel — uses transform scaling instead of object-fit for iOS Safari */}
               <div 
-                className="w-full shrink-0 border-b-4 border-accent relative overflow-hidden bg-black" 
-                style={{ height: '70vh', minHeight: '500px' }}
+                className="w-full shrink-0 border-b-4 border-accent relative bg-black" 
+                style={{ height: '70vh', minHeight: '500px', overflow: 'hidden' }}
                 onClick={() => !mobileVideoPlaying && handleVideoPlay(mobileVideoRef, setMobileVideoPlaying)}
               >
                 <video
@@ -251,9 +251,15 @@ export default function Dashboard() {
                   preload="auto"
                   style={{
                     display: 'block',
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
+                    minWidth: '100%',
+                    minHeight: '100%',
+                    width: 'auto',
+                    height: 'auto',
+                    position: 'relative',
+                    top: '50%',
+                    left: '50%',
+                    WebkitTransform: 'translate(-50%, -50%) translateZ(0)',
+                    transform: 'translate(-50%, -50%) translateZ(0)',
                   }}
                 >
                   <source src="/kangkodosvideo.mp4" type="video/mp4" />
