@@ -134,7 +134,7 @@ export default function Dashboard() {
   return (
     <>
       <WelcomeModal />
-      <div className="flex flex-col h-screen overflow-hidden bg-background relative">
+      <div className="flex flex-col h-screen bg-background relative">
         <div className="relative z-10 flex flex-col h-full">
           <Header viewerCount={viewerCount} connected={connected} />
 
@@ -182,10 +182,10 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Mobile: Vertical layout - Video → Thoughts → Chat */}
-            <div className="lg:hidden flex flex-col flex-1 overflow-hidden">
+            {/* Mobile: Vertical layout - Scrollable */}
+            <div className="lg:hidden flex flex-col flex-1 overflow-y-auto">
               {/* Video panel */}
-              <div className="h-[40vh] relative overflow-hidden border-b-4 border-accent">
+              <div className="min-h-[40vh] relative overflow-hidden border-b-4 border-accent">
                 <video
                   autoPlay loop muted playsInline
                   className="absolute inset-0 w-full h-full object-cover"
@@ -214,18 +214,52 @@ export default function Dashboard() {
               </div>
 
               {/* Thoughts panel */}
-              <div className="h-[30vh] border-b-4 border-accent">
+              <div className="min-h-[30vh] border-b-4 border-accent">
                 <SidePanel thoughts={thoughts} />
               </div>
 
               {/* Chat panel */}
-              <div className="flex-1 min-h-0">
+              <div className="min-h-[40vh]">
                 <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
+              </div>
+
+              {/* Bottom: Input Area — full width */}
+              <div className="w-full px-3 pb-3 pt-3 space-y-2">
+                {/* Notifications */}
+                {errorMessage && (
+                  <div className="w-full p-4 bg-red-500/20 border-4 border-red-500 text-sm text-red-700 animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                    <span className="font-black">Error:</span>
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
+                
+                {responseNotification && (
+                  <div className="w-full p-4 bg-accent/20 border-4 border-accent text-sm text-accent-dark animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                    <div className="w-3 h-3 bg-accent rounded-full animate-pulse-glow border-2 border-accent-dark" />
+                    <span>{responseNotification}</span>
+                  </div>
+                )}
+                
+                {queueStatus && queueStatus.totalQueued > 0 && (
+                  <div className="w-full p-4 bg-success/20 border-4 border-success text-sm text-[var(--color-success-dark)] animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                    <div className="w-3 h-3 bg-success rounded-full animate-pulse-glow border-2 border-[var(--color-success-dark)]" />
+                    <span>
+                      {queueStatus.position > 0 ? (
+                        <>Queue position {queueStatus.position}/{queueStatus.totalQueued}</>
+                      ) : (
+                        <>{queueStatus.totalQueued} message{queueStatus.totalQueued > 1 ? 's' : ''} pending</>
+                      )}
+                      {' · '}{Math.ceil(queueStatus.estimatedWaitSeconds)}s
+                    </span>
+                  </div>
+                )}
+                
+                <MessageInput onSend={sendMessage} disabled={!connected} />
               </div>
             </div>
 
-            {/* Bottom: Input Area — full width */}
-            <div className="w-full px-3 pb-3 space-y-2">
+            {/* Desktop: Bottom Input Area */}
+            <div className="hidden lg:block w-full px-3 pb-3 space-y-2">
               {/* Notifications */}
               {errorMessage && (
                 <div className="w-full p-4 bg-red-500/20 border-4 border-red-500 text-sm text-red-700 animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
