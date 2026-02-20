@@ -1,22 +1,31 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Simpsonfont";
+  src: url("/simpsonfont/Simpsonfont DEMO.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
-  --color-background: #080f1a;
-  --color-foreground: #e2ffe8;
-  --color-card: #0c1825;
-  --color-card-hover: #111f30;
-  --color-border: #1a3a2a;
-  --color-border-bright: #22c55e;
-  --color-accent: #22c55e;
-  --color-accent-light: #4ade80;
-  --color-accent-glow: rgba(34, 197, 94, 0.4);
-  --color-accent-dark: #16a34a;
-  --color-success: #22c55e;
-  --color-muted: #6b8f71;
-  --color-muted-light: #86a98c;
-  --color-chat-bg: #080f1a;
-  --color-input-bg: #0c1825;
-  --color-live-pulse: #22c55e;
+  --color-background: #ffeaa7;
+  --color-foreground: #2d3436;
+  --color-card: #fff9e6;
+  --color-card-hover: #fffbf0;
+  --color-border: #fdcb6e;
+  --color-border-bright: #f39c12;
+  --color-accent: #f39c12;
+  --color-accent-light: #fdcb6e;
+  --color-accent-glow: rgba(243, 156, 18, 0.5);
+  --color-accent-dark: #e67e22;
+  --color-success: #74b9ff;
+  --color-success-dark: #0984e3;
+  --color-muted: #636e72;
+  --color-muted-light: #b2bec3;
+  --color-chat-bg: #fff9e6;
+  --color-input-bg: #fffbf0;
+  --color-live-pulse: #f39c12;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-geist-sans);
@@ -24,48 +33,50 @@
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(34, 197, 94, 0.3) transparent;
+  scrollbar-color: rgba(243, 156, 18, 0.4) transparent;
 }
 
-*::-webkit-scrollbar { width: 6px; }
-*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar { width: 8px; }
+*::-webkit-scrollbar-track { background: rgba(255, 249, 230, 0.5); }
 *::-webkit-scrollbar-thumb {
-  background: rgba(34, 197, 94, 0.3);
-  border-radius: 3px;
+  background: rgba(243, 156, 18, 0.5);
+  border-radius: 4px;
 }
-*::-webkit-scrollbar-thumb:hover { background: rgba(34, 197, 94, 0.5); }
+*::-webkit-scrollbar-thumb:hover { background: rgba(243, 156, 18, 0.7); }
 
 body {
-  background: var(--color-background);
+  background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 50%, #ffeaa7 100%);
   color: var(--color-foreground);
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
 }
 
 .shadow-elegant {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 0 20px rgba(34,197,94,0.08);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15), 0 2px 4px rgba(243, 156, 18, 0.2), 0 0 0 2px rgba(243, 156, 18, 0.1);
 }
 
 .shadow-elegant-lg {
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5), 0 0 40px rgba(34,197,94,0.12);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2), 0 4px 8px rgba(243, 156, 18, 0.3), 0 0 0 3px rgba(243, 156, 18, 0.15);
 }
 
 .terminal-border {
-  border: 1px solid rgba(34, 197, 94, 0.25);
-  border-radius: 12px;
+  border: 3px solid rgba(243, 156, 18, 0.4);
+  border-radius: 20px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3);
 }
 
 .glow-accent {
-  text-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+  text-shadow: 2px 2px 0 rgba(243, 156, 18, 0.3), 0 0 10px rgba(243, 156, 18, 0.5);
 }
 
 .glow-success {
-  text-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+  text-shadow: 2px 2px 0 rgba(116, 185, 255, 0.3), 0 0 10px rgba(116, 185, 255, 0.5);
 }
 
 .glow-live {
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.5), 0 0 20px rgba(34, 197, 94, 0.3);
+  box-shadow: 0 0 12px rgba(243, 156, 18, 0.6), 0 0 24px rgba(243, 156, 18, 0.4), 0 4px 8px rgba(0,0,0,0.2);
 }
 
 @keyframes pulse-glow {

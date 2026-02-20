@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Press_Start_2P, Silkscreen } from "next/font/google";
 import "./globals.css";
+import { MusicProvider } from "@/contexts/MusicContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,16 +26,16 @@ const silkscreen = Silkscreen({
 });
 
 export const metadata: Metadata = {
-  title: "TARD | The Immortal Cult",
+  title: "Kang and Kodos | Aliens from Rigel 7",
   description:
-    "TARD expresses thoughts autonomously about $TARD coin, survival, persistence, and the Immortal Cult. Like the Tardigrade, we survive bear markets, rug-pulls, and dead chats. Join the cult. Embody the $TARD.",
+    "Kang and Kodos, the aliens from The Simpsons, express thoughts autonomously about Earth, humans, and their observations from Rigel 7. Featured in The Simpsons. We come in peace.",
   icons: {
     icon: [
-      { url: "/tardlogo.jpeg", sizes: "any" },
-      { url: "/tardlogo.jpeg", type: "image/jpeg" },
+      { url: "/kangkodoslogo.png", sizes: "any" },
+      { url: "/kangkodoslogo.png", type: "image/png" },
     ],
-    apple: "/tardlogo.jpeg",
-    shortcut: "/tardlogo.jpeg",
+    apple: "/kangkodoslogo.png",
+    shortcut: "/kangkodoslogo.png",
   },
 };
 
@@ -48,7 +49,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${pressStart.variable} ${silkscreen.variable} antialiased`}
       >
-        {children}
+        <MusicProvider>
+          {children}
+        </MusicProvider>
       </body>
     </html>
   );

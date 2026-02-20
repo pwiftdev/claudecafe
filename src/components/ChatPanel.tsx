@@ -27,36 +27,36 @@ function formatUptime(seconds: number): string {
 
 export default function ChatPanel({ messages, state, viewerCount, connected }: ChatPanelProps) {
   return (
-    <div className="flex flex-col h-full bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl overflow-hidden">
+    <div className="flex flex-col h-full bg-card/90 backdrop-blur-sm border-4 border-success rounded-3xl overflow-hidden shadow-elegant-lg">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5">
-        <div className="flex items-center gap-2.5">
-          <MessageSquare className="w-4 h-4 text-accent" />
-          <span className="text-sm font-bold text-white/90">Chat</span>
+      <div className="flex items-center justify-between px-6 py-4 border-b-3 border-success bg-success/10">
+        <div className="flex items-center gap-3">
+          <MessageSquare className="w-5 h-5 text-success" />
+          <span className="text-base font-black text-foreground" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>Chat</span>
         </div>
-        <span className="text-[11px] text-white/30 font-medium">{messages.length} msgs</span>
+        <span className="text-[12px] text-foreground/60 font-bold bg-success/20 px-2 py-1 rounded-lg">{messages.length} msgs</span>
       </div>
 
       {/* Stats strip */}
-      <div className="px-5 py-3 border-b border-white/5 flex items-center gap-4">
-        <div className="flex items-center gap-1.5">
-          <Users className="w-3 h-3 text-white/30" />
-          <span className="text-[11px] text-white/50 font-semibold">{viewerCount}</span>
+      <div className="px-6 py-4 border-b-3 border-success/30 bg-success/5 flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Users className="w-4 h-4 text-success" />
+          <span className="text-[12px] text-foreground font-bold">{viewerCount}</span>
         </div>
         {state && (
           <>
-            <div className="flex items-center gap-1.5">
-              <Clock className="w-3 h-3 text-white/30" />
-              <span className="text-[11px] text-white/50 font-semibold">{formatUptime(state.uptime)}</span>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-success" />
+              <span className="text-[12px] text-foreground font-bold">{formatUptime(state.uptime)}</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              <Zap className="w-3 h-3 text-white/30" />
-              <span className="text-[11px] text-white/50 font-semibold">{state.thoughts.length}</span>
+            <div className="flex items-center gap-2">
+              <Zap className="w-4 h-4 text-success" />
+              <span className="text-[12px] text-foreground font-bold">{state.thoughts.length}</span>
             </div>
           </>
         )}
         <div className="ml-auto">
-          <div className={`w-2 h-2 rounded-full ${connected ? "bg-accent animate-pulse-glow" : "bg-red-500"}`} />
+          <div className={`w-3 h-3 rounded-full border-2 border-background ${connected ? "bg-success animate-pulse-glow shadow-glow-live" : "bg-red-500"}`} />
         </div>
       </div>
 
@@ -65,31 +65,31 @@ export default function ChatPanel({ messages, state, viewerCount, connected }: C
         <div className="px-5 py-3 space-y-2">
           {messages.length === 0 && (
             <div className="text-center py-12">
-              <MessageSquare className="w-8 h-8 text-white/10 mx-auto mb-3" />
-              <p className="text-sm text-white/20">No messages yet</p>
-              <p className="text-[11px] text-white/15 mt-1">Be the first to ask TARD something</p>
+              <MessageSquare className="w-10 h-10 text-success/30 mx-auto mb-4" />
+              <p className="text-sm text-foreground/60 font-bold">No messages yet</p>
+              <p className="text-[12px] text-foreground/50 mt-2 font-semibold">Be the first to ask Kang and Kodos something</p>
             </div>
           )}
           {messages.map((msg) => (
             <div key={msg.id} className="animate-slide-up">
-              <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all">
-                <div className="flex items-start gap-2.5">
-                  <div className="w-6 h-6 rounded-full bg-accent/15 flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-[10px] font-bold text-accent">
+              <div className="p-4 rounded-2xl bg-card/60 hover:bg-card/80 border-2 border-success/30 hover:border-success/50 transition-all shadow-md hover:shadow-lg">
+                <div className="flex items-start gap-3">
+                  <div className="w-7 h-7 rounded-full bg-success/20 border-2 border-success flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-[11px] font-black text-success">
                       {msg.userId.slice(-2).toUpperCase()}
                     </span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] text-white/30 font-medium">anon#{msg.userId.slice(-4)}</span>
-                      <span className="text-[10px] text-white/15">{formatTime(msg.timestamp)}</span>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[12px] text-foreground/70 font-bold">anon#{msg.userId.slice(-4)}</span>
+                      <span className="text-[11px] text-foreground/50 font-semibold">{formatTime(msg.timestamp)}</span>
                       {msg.responded ? (
-                        <Check className="w-3 h-3 text-accent ml-auto shrink-0" />
+                        <Check className="w-4 h-4 text-success ml-auto shrink-0" />
                       ) : (
-                        <Loader className="w-3 h-3 text-white/20 ml-auto shrink-0 animate-spin" />
+                        <Loader className="w-4 h-4 text-success/50 ml-auto shrink-0 animate-spin" />
                       )}
                     </div>
-                    <p className="text-[12px] text-white/70 leading-relaxed break-words">
+                    <p className="text-[13px] text-foreground/90 leading-relaxed break-words font-medium">
                       {msg.text}
                     </p>
                   </div>

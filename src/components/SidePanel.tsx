@@ -1,7 +1,7 @@
 "use client";
 
 import { Zap, MessageSquare, Reply } from "lucide-react";
-import type { AIThought } from "@/game/types";
+import type { AIThought, AIAuthor } from "@/game/types";
 import { cleanText } from "@/utils/textCleaner";
 
 const typeConfig: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -22,18 +22,18 @@ export default function SidePanel({ thoughts }: SidePanelProps) {
   const historyThoughts = thoughts.slice(1);
 
   return (
-    <div className="flex flex-col h-full bg-card/40 backdrop-blur-xl border border-white/5 rounded-2xl overflow-hidden">
+    <div className="flex flex-col h-full bg-card/90 backdrop-blur-sm border-4 border-accent rounded-3xl overflow-hidden shadow-elegant-lg">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5">
-        <div className="flex items-center gap-2.5">
-          <Zap className="w-4 h-4 text-accent" />
-          <span className="text-sm font-bold text-white/90">TARD&apos;s Thoughts</span>
+      <div className="flex items-center justify-between px-6 py-4 border-b-3 border-accent bg-accent/10">
+        <div className="flex items-center gap-3">
+          <Zap className="w-5 h-5 text-accent" />
+          <span className="text-base font-black text-foreground" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>Kang and Kodos&apos; Thoughts</span>
         </div>
-        <span className="text-[11px] text-white/30 font-medium">{thoughts.length} total</span>
+        <span className="text-[12px] text-foreground/60 font-bold bg-accent/20 px-2 py-1 rounded-lg">{thoughts.length} total</span>
       </div>
 
       {/* Current thought */}
-      <div className="px-5 py-4 border-b border-white/5 bg-accent/[0.03]">
+      <div className="px-6 py-5 border-b-3 border-accent/30 bg-accent/5">
         <div className="flex items-center gap-2 mb-3">
           <div className="flex gap-1">
             <div className="typing-dot w-1.5 h-1.5 rounded-full bg-accent" />
@@ -44,22 +44,25 @@ export default function SidePanel({ thoughts }: SidePanelProps) {
         </div>
         {currentThought ? (
           <div className="animate-fade-in">
-            {currentThought.replyTo && (
-              <div className="flex items-center gap-1.5 mb-2">
-                <Reply className="w-3 h-3 text-accent/60" />
-                <span className="text-[11px] text-accent/70 font-medium">replying to anon#{currentThought.replyTo.slice(-4)}</span>
-              </div>
-            )}
-            <p className="text-[13px] text-white/85 leading-relaxed mb-3">
+            <div className="flex items-center gap-2 mb-2">
+              <AuthorBadge author={currentThought.author} />
+              {currentThought.replyTo && (
+                <div className="flex items-center gap-1.5">
+                  <Reply className="w-3 h-3 text-accent/60" />
+                  <span className="text-[11px] text-accent/70 font-medium">replying to anon#{currentThought.replyTo.slice(-4)}</span>
+                </div>
+              )}
+            </div>
+            <p className="text-[14px] text-foreground leading-relaxed mb-3 font-medium">
               {cleanText(currentThought.text)}
             </p>
             <div className="flex items-center gap-2">
               <ThoughtTag type={currentThought.type} />
-              <span className="text-[11px] text-white/25">{currentThought.time}</span>
+              <span className="text-[12px] text-foreground/50 font-semibold">{currentThought.time}</span>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-white/30">Waiting for TARD to cook...</p>
+          <p className="text-sm text-foreground/50 font-bold">Waiting for Kang and Kodos to observe...</p>
         )}
       </div>
 
@@ -68,21 +71,24 @@ export default function SidePanel({ thoughts }: SidePanelProps) {
         <div className="px-5 py-3 space-y-2">
           {historyThoughts.map((thought) => (
             <div key={thought.id} className="group animate-slide-up">
-              <div className="p-3.5 rounded-xl bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 hover:border-white/10 transition-all cursor-pointer">
-                {thought.replyTo && (
-                  <div className="flex items-center gap-1.5 mb-1.5">
-                    <Reply className="w-2.5 h-2.5 text-accent/50" />
-                    <span className="text-[10px] text-accent/60 font-medium">replying to anon#{thought.replyTo.slice(-4)}</span>
-                  </div>
-                )}
-                <p className="text-[12px] text-white/60 group-hover:text-white/80 leading-relaxed mb-2.5">
+              <div className="p-4 rounded-2xl bg-card/60 hover:bg-card/80 border-2 border-accent/30 hover:border-accent/50 transition-all cursor-pointer shadow-md hover:shadow-lg">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <AuthorBadge author={thought.author} />
+                  {thought.replyTo && (
+                    <div className="flex items-center gap-1.5">
+                      <Reply className="w-2.5 h-2.5 text-accent/50" />
+                      <span className="text-[10px] text-accent/60 font-medium">replying to anon#{thought.replyTo.slice(-4)}</span>
+                    </div>
+                  )}
+                </div>
+                <p className="text-[13px] text-foreground/80 group-hover:text-foreground leading-relaxed mb-3 font-medium">
                   {cleanText(thought.text)}
                 </p>
                 <div className="flex items-center gap-2">
                   <ThoughtTag type={thought.type} />
-                  <span className="text-[10px] text-white/20">{thought.time}</span>
+                  <span className="text-[11px] text-foreground/50 font-semibold">{thought.time}</span>
                   {thought.cost !== undefined && (
-                    <span className="text-[10px] text-white/15 ml-auto font-mono">
+                    <span className="text-[11px] text-foreground/40 ml-auto font-mono font-bold">
                       ${thought.cost.toFixed(4)}
                     </span>
                   )}
@@ -92,7 +98,7 @@ export default function SidePanel({ thoughts }: SidePanelProps) {
           ))}
           {historyThoughts.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-sm text-white/20">No thoughts yet ser</p>
+              <p className="text-sm text-foreground/50 font-bold">No thoughts yet!</p>
             </div>
           )}
         </div>
@@ -106,6 +112,19 @@ function ThoughtTag({ type }: { type: string }) {
   return (
     <span className={`text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider ${cfg.color} ${cfg.bg} ${cfg.border} border`}>
       {cfg.label}
+    </span>
+  );
+}
+
+function AuthorBadge({ author }: { author: AIAuthor }) {
+  const isKang = author === "kang";
+  return (
+    <span className={`text-[10px] px-2 py-0.5 rounded-md font-black uppercase tracking-wider ${
+      isKang 
+        ? "bg-blue-500/20 text-blue-400 border border-blue-500/30" 
+        : "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+    }`} style={{ fontFamily: 'Simpsonfont, sans-serif' }}>
+      {isKang ? "KANG" : "KODOS"}
     </span>
   );
 }

@@ -58,12 +58,14 @@ export interface GameStats {
 }
 
 export type ThoughtType = "degen" | "meme" | "alpha" | "fud" | "response" | "pump";
+export type AIAuthor = "kang" | "kodos";
 
 export interface AIThought {
   id: number;
   text: string;
   time: string;
   type: ThoughtType;
+  author: AIAuthor;
   cost?: number;
   replyTo?: string;
 }

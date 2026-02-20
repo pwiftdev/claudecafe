@@ -6,7 +6,6 @@ import Header from "./Header";
 import SidePanel from "./SidePanel";
 import MessageInput from "./MessageInput";
 import WelcomeModal from "./WelcomeModal";
-import BouncingLogos from "./BouncingLogos";
 import ChatPanel from "./ChatPanel";
 import type { AIThought, BroadcastState, UserMessage } from "@/game/types";
 
@@ -114,7 +113,7 @@ export default function Dashboard() {
     socket.on("messageResponded", (data: { messageId: string; response: AIThought }) => {
       setMessages(prev => prev.map(m => m.id === data.messageId ? { ...m, responded: true } : m));
       if (sentMessagesRef.current.has(data.messageId)) {
-        setResponseNotification("TARD has responded to your message!");
+        setResponseNotification("Kang and Kodos have responded to your message!");
         setTimeout(() => setResponseNotification(null), 5000);
         sentMessagesRef.current.delete(data.messageId);
         setQueueStatus(null);
@@ -141,41 +140,28 @@ export default function Dashboard() {
 
           {/* Main Layout */}
           <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="flex-1 overflow-hidden flex gap-3 p-3">
+            {/* Desktop: Horizontal layout */}
+            <div className="hidden lg:flex flex-1 overflow-hidden gap-3 p-3">
               {/* Left: Chat panel */}
-              <div className="hidden lg:block w-[320px] shrink-0">
+              <div className="w-[320px] shrink-0">
                 <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
               </div>
 
               {/* Center: Video panel */}
-              <div className="flex-1 relative overflow-hidden rounded-2xl border border-white/5 bg-black/40">
+              <div className="flex-1 relative overflow-hidden rounded-3xl border-4 border-accent bg-black/20 shadow-elegant-lg">
                 <video
                   autoPlay loop muted playsInline
                   className="absolute inset-0 w-full h-full object-cover"
                 >
-                  <source src="/tard.mp4" type="video/mp4" />
+                  <source src="/kangkodosvideo.mp4" type="video/mp4" />
                 </video>
                 <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30" />
-
-                {/* Bouncing logos */}
-                <BouncingLogos />
-
-                {/* Center overlay text */}
-                <div className="absolute inset-0 flex items-center justify-center z-10">
-                  <div className="text-center px-6" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9), 0 0 40px rgba(0,0,0,0.7), 0 0 80px rgba(0,0,0,0.5)' }}>
-                    <p className="text-white text-lg sm:text-2xl font-black uppercase tracking-widest mb-1" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9), 0 4px 40px rgba(0,0,0,0.7)' }}>
-                      They call us
-                    </p>
-                    <p className="text-accent text-4xl sm:text-6xl font-black uppercase tracking-wider mb-2" style={{ textShadow: '0 0 30px rgba(34,197,94,0.6), 0 0 60px rgba(34,197,94,0.3), 0 4px 20px rgba(0,0,0,0.9)' }}>
-                      TARDs
-                    </p>
-                    <p className="text-white text-lg sm:text-2xl font-black uppercase tracking-widest mb-6" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9), 0 4px 40px rgba(0,0,0,0.7)' }}>
-                      because we don&apos;t sell.
-                    </p>
-                    <p className="text-accent text-5xl sm:text-7xl font-black tracking-tighter" style={{ textShadow: '0 0 40px rgba(34,197,94,0.8), 0 0 80px rgba(34,197,94,0.4), 0 0 120px rgba(34,197,94,0.2), 0 4px 30px rgba(0,0,0,0.9)' }}>
-                      $TARD
-                    </p>
-                  </div>
+                
+                {/* Top text */}
+                <div className="absolute top-4 left-0 right-0 z-10 flex justify-center">
+                  <p className="text-white text-lg font-black px-4 py-2 bg-black/60 rounded-xl border-2 border-accent shadow-lg" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>
+                    Yes, the LEFT one is Kang.
+                  </p>
                 </div>
 
                 {!connected && (
@@ -191,8 +177,50 @@ export default function Dashboard() {
               </div>
 
               {/* Right: Thoughts */}
-              <div className="hidden lg:block w-[320px] shrink-0">
+              <div className="w-[320px] shrink-0">
                 <SidePanel thoughts={thoughts} />
+              </div>
+            </div>
+
+            {/* Mobile: Vertical layout - Video → Thoughts → Chat */}
+            <div className="lg:hidden flex flex-col flex-1 overflow-hidden">
+              {/* Video panel */}
+              <div className="h-[40vh] relative overflow-hidden border-b-4 border-accent">
+                <video
+                  autoPlay loop muted playsInline
+                  className="absolute inset-0 w-full h-full object-cover"
+                >
+                  <source src="/kangkodosvideo.mp4" type="video/mp4" />
+                </video>
+                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30" />
+                
+                {/* Top text */}
+                <div className="absolute top-2 left-0 right-0 z-10 flex justify-center">
+                  <p className="text-white text-sm font-black px-3 py-1.5 bg-black/60 rounded-lg border-2 border-accent shadow-lg" style={{ fontFamily: 'Simpsonfont, sans-serif' }}>
+                    Yes, the LEFT one is Kang.
+                  </p>
+                </div>
+
+                {!connected && (
+                  <div className="absolute inset-0 flex items-center justify-center z-10">
+                    <div className="text-center">
+                      <div className="inline-block mb-2">
+                        <div className="w-8 h-8 border-2 border-white/10 border-t-accent rounded-full animate-spin" />
+                      </div>
+                      <p className="text-white/30 text-xs">Connecting...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Thoughts panel */}
+              <div className="h-[30vh] border-b-4 border-accent">
+                <SidePanel thoughts={thoughts} />
+              </div>
+
+              {/* Chat panel */}
+              <div className="flex-1 min-h-0">
+                <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
               </div>
             </div>
 
@@ -200,22 +228,22 @@ export default function Dashboard() {
             <div className="w-full px-3 pb-3 space-y-2">
               {/* Notifications */}
               {errorMessage && (
-                <div className="w-full p-3 bg-red-500/10 border border-red-500/20 text-sm text-red-400 animate-fade-in rounded-xl flex items-center justify-center gap-2">
-                  <span className="font-semibold">Error:</span>
-                  <span className="text-red-400/80">{errorMessage}</span>
+                <div className="w-full p-4 bg-red-500/20 border-4 border-red-500 text-sm text-red-700 animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                  <span className="font-black">Error:</span>
+                  <span>{errorMessage}</span>
                 </div>
               )}
               
               {responseNotification && (
-                <div className="w-full p-3 bg-accent/10 border border-accent/20 text-sm text-accent animate-fade-in rounded-xl flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-accent rounded-full animate-pulse-glow" />
+                <div className="w-full p-4 bg-accent/20 border-4 border-accent text-sm text-accent-dark animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                  <div className="w-3 h-3 bg-accent rounded-full animate-pulse-glow border-2 border-accent-dark" />
                   <span>{responseNotification}</span>
                 </div>
               )}
               
               {queueStatus && queueStatus.totalQueued > 0 && (
-                <div className="w-full p-3 bg-white/[0.03] border border-white/10 text-sm text-white/50 animate-fade-in rounded-xl flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-accent rounded-full animate-pulse-glow" />
+                <div className="w-full p-4 bg-success/20 border-4 border-success text-sm text-[var(--color-success-dark)] animate-fade-in rounded-2xl flex items-center justify-center gap-2 shadow-md font-bold">
+                  <div className="w-3 h-3 bg-success rounded-full animate-pulse-glow border-2 border-[var(--color-success-dark)]" />
                   <span>
                     {queueStatus.position > 0 ? (
                       <>Queue position {queueStatus.position}/{queueStatus.totalQueued}</>
@@ -231,15 +259,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Mobile panels */}
-          <div className="lg:hidden border-t border-white/5 h-[50vh] shrink-0 flex">
-            <div className="w-1/2 border-r border-white/5">
-              <ChatPanel messages={messages} state={state} viewerCount={viewerCount} connected={connected} />
-            </div>
-            <div className="w-1/2">
-              <SidePanel thoughts={thoughts} />
-            </div>
-          </div>
         </div>
       </div>
     </>

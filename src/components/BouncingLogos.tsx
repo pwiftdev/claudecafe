@@ -69,7 +69,7 @@ export default function BouncingLogos() {
       {positions.map((logo, i) => (
         <img
           key={i}
-          src="/tardlogo.jpeg"
+          src="/kangkodoslogo.png"
           alt=""
           className="absolute rounded-full"
           style={{
