@@ -216,6 +216,7 @@ export default function Dashboard() {
                       autoPlay loop muted playsInline
                       className="absolute inset-0 w-full h-full object-cover"
                     >
+                      <source src="/kangkodosvideo.mov" type="video/quicktime" />
                       <source src="/kangkodosvideo.mp4" type="video/mp4" />
                     </video>
                     
@@ -303,7 +304,7 @@ export default function Dashboard() {
                         preload="auto"
                         poster="/kangkodoslogo.png"
                         style="display:block;width:100%;height:100%;object-fit:cover;background:#000;"
-                      ><source src="/kangkodosvideo.mp4" type="video/mp4"></video>`
+                      ><source src="/kangkodosvideo.mov" type="video/quicktime"><source src="/kangkodosvideo.mp4" type="video/mp4"></video>`
                     }}
                   />
                   
