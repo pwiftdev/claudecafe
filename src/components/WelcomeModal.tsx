@@ -43,7 +43,7 @@ export default function WelcomeModal() {
             <div className="relative">
               <div className="w-14 h-14 rounded-2xl overflow-hidden border-4 border-accent shadow-lg">
                 <img
-                  src="/kangkodoslogo.png"
+                  src="/rigellianslogo.jpeg"
                   alt="Kang and Kodos"
                   className="w-full h-full object-cover"
                 />
@@ -72,7 +72,7 @@ export default function WelcomeModal() {
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-12 h-12 border-4 border-accent bg-accent/20 shrink-0 rounded-2xl overflow-hidden shadow-md">
                 <img
-                  src="/kangkodoslogo.png"
+                  src="/rigellianslogo.jpeg"
                   alt="Kang and Kodos"
                   className="w-full h-full object-cover"
                 />
@@ -91,7 +91,7 @@ export default function WelcomeModal() {
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-10 h-10 border border-accent/50 bg-accent/10 shrink-0 terminal-border rounded-full overflow-hidden">
                 <img
-                  src="/kangkodoslogo.png"
+                  src="/rigellianslogo.jpeg"
                   alt="Kang and Kodos"
                   className="w-full h-full object-cover"
                 />
@@ -110,7 +110,7 @@ export default function WelcomeModal() {
             <div className="flex items-start gap-3">
               <div className="flex items-center justify-center w-10 h-10 border border-accent/50 bg-accent/10 shrink-0 terminal-border rounded-full overflow-hidden">
                 <img
-                  src="/kangkodoslogo.png"
+                  src="/rigellianslogo.jpeg"
                   alt="Kang and Kodos"
                   className="w-full h-full object-cover"
                 />
@@ -131,7 +131,7 @@ export default function WelcomeModal() {
               <li className="flex items-start gap-2">
                 <div className="w-5 h-5 rounded-lg overflow-hidden border-2 border-accent shrink-0 mt-0.5 shadow-sm">
                   <img
-                    src="/kangkodoslogo.png"
+                    src="/rigellianslogo.jpeg"
                     alt=""
                     className="w-full h-full object-cover"
                   />
@@ -141,7 +141,7 @@ export default function WelcomeModal() {
               <li className="flex items-start gap-2">
                 <div className="w-5 h-5 rounded-lg overflow-hidden border-2 border-accent shrink-0 mt-0.5 shadow-sm">
                   <img
-                    src="/kangkodoslogo.png"
+                    src="/rigellianslogo.jpeg"
                     alt=""
                     className="w-full h-full object-cover"
                   />
@@ -151,7 +151,7 @@ export default function WelcomeModal() {
               <li className="flex items-start gap-2">
                 <div className="w-5 h-5 rounded-lg overflow-hidden border-2 border-accent shrink-0 mt-0.5 shadow-sm">
                   <img
-                    src="/kangkodoslogo.png"
+                    src="/rigellianslogo.jpeg"
                     alt=""
                     className="w-full h-full object-cover"
                   />
@@ -161,7 +161,7 @@ export default function WelcomeModal() {
               <li className="flex items-start gap-2">
                 <div className="w-5 h-5 rounded-lg overflow-hidden border-2 border-accent shrink-0 mt-0.5 shadow-sm">
                   <img
-                    src="/kangkodoslogo.png"
+                    src="/rigellianslogo.jpeg"
                     alt=""
                     className="w-full h-full object-cover"
                   />
@@ -171,7 +171,7 @@ export default function WelcomeModal() {
               <li className="flex items-start gap-2">
                 <div className="w-5 h-5 rounded-lg overflow-hidden border-2 border-accent shrink-0 mt-0.5 shadow-sm">
                   <img
-                    src="/kangkodoslogo.png"
+                    src="/rigellianslogo.jpeg"
                     alt=""
                     className="w-full h-full object-cover"
                   />

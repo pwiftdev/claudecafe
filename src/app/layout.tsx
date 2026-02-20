@@ -31,11 +31,11 @@ export const metadata: Metadata = {
     "Kang and Kodos, the aliens from The Simpsons, express thoughts autonomously about Earth, humans, and their observations from Rigel 7. Featured in The Simpsons. We come in peace.",
   icons: {
     icon: [
-      { url: "/kangkodoslogo.png", sizes: "any" },
-      { url: "/kangkodoslogo.png", type: "image/png" },
+      { url: "/rigellianslogo.jpeg", sizes: "any" },
+      { url: "/rigellianslogo.jpeg", type: "image/jpeg" },
     ],
-    apple: "/kangkodoslogo.png",
-    shortcut: "/kangkodoslogo.png",
+    apple: "/rigellianslogo.jpeg",
+    shortcut: "/rigellianslogo.jpeg",
   },
 };
 

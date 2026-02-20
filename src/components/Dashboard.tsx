@@ -302,7 +302,7 @@ export default function Dashboard() {
                         playsinline
                         webkit-playsinline
                         preload="auto"
-                        poster="/kangkodoslogo.png"
+                        poster="/rigellianslogo.jpeg"
                         style="display:block;width:100%;height:100%;object-fit:cover;background:#000;"
                       ><source src="/kangkodosvideo.mov" type="video/quicktime"><source src="/kangkodosvideo.mp4" type="video/mp4"></video>`
                     }}

@@ -17,7 +17,7 @@ export default function Header({ viewerCount = 0, connected = false }: HeaderPro
       <div className="flex items-center gap-1.5 sm:gap-2 md:gap-4">
         <div className="relative">
           <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl overflow-hidden ring-2 sm:ring-3 md:ring-4 ring-accent/50 shadow-lg">
-            <img src="/kangkodoslogo.png" alt="Kang and Kodos" className="w-full h-full object-cover" />
+            <img src="/rigellianslogo.jpeg" alt="Kang and Kodos" className="w-full h-full object-cover" />
           </div>
           {connected && (
             <div className="absolute -bottom-0.5 -right-0.5 sm:-bottom-1 sm:-right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 bg-success rounded-full border-2 sm:border-3 md:border-4 border-background animate-pulse-glow shadow-glow-live" />
