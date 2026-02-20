@@ -185,11 +185,10 @@ export default function Dashboard() {
             {/* Mobile: Vertical layout - Scrollable */}
             <div className="lg:hidden flex flex-col flex-1 overflow-y-auto">
               {/* Video panel */}
-              <div className="h-[45vh] w-full relative overflow-hidden border-b-4 border-accent bg-black">
+              <div className="w-full aspect-video relative overflow-hidden border-b-4 border-accent bg-black">
                 <video
                   autoPlay loop muted playsInline
-                  className="absolute inset-0 w-full h-full object-cover"
-                  style={{ minHeight: '100%', minWidth: '100%' }}
+                  className="w-full h-full object-cover"
                 >
                   <source src="/kangkodosvideo.mp4" type="video/mp4" />
                 </video>
